@@ -47,6 +47,7 @@ const Create = () => {
     // Custom hooks
     const { currentStep, nextStep, previousStep } = useStepWizard(3);
     const {
+        post,
         formData,
         setData,
         addErrorCorrection,
@@ -58,12 +59,11 @@ const Create = () => {
     } = usePetitionForm();
 
     const handleSubmit = () => {
-        console.log('Form submitted:', formData);
-        alert(
-            '✅ Petition created successfully!\n\nIn production, this would call:\nrouter.post("/petitions", formData)',
-        );
-        // In real app: router.post('/petitions', formData)
-        reset();
+        post(petitions.store.url(), {
+            onSuccess: () => {
+                reset();
+            },
+        });
     };
 
     return (
@@ -73,11 +73,11 @@ const Create = () => {
                 <div className="mb-8">
                     <div className="mb-2 flex items-center gap-2">
                         <FileText className="h-6 w-6 text-primary" />
-                        <h1 className="text-3xl font-bold text-gray-900">
+                        <h1 className="text-3xl font-bold text-primary">
                             Create New Petition
                         </h1>
                     </div>
-                    <p className="text-gray-600">
+                    <p className="text-muted-foreground">
                         Follow the steps below to create a petition for civil
                         registry correction
                     </p>

@@ -58,11 +58,11 @@ const ErrorCorrectionsStep = ({
             <CardContent className="space-y-6">
                 <Alert
                     variant={'default'}
-                    className="border-amber-200 bg-amber-50 text-amber-800"
+                    className="border-amber-200 bg-amber-50 text-amber-600 dark:border-amber-800 dark:bg-amber-900/40 dark:text-amber-500"
                 >
                     <Info className="h-4 w-4" />
 
-                    <AlertDescription className="text-amber-800">
+                    <AlertDescription className="text-amber-800 dark:text-amber-500">
                         <strong>Important:</strong> List each error separately
                         with the current (incorrect) value and the corrected
                         value. Be as specific as possible.
@@ -73,7 +73,7 @@ const ErrorCorrectionsStep = ({
                     {formData.errors_to_correct.map((error, index) => (
                         <div
                             key={index}
-                            className="rounded-lg border-2 border-gray-200 bg-white p-4 transition-all hover:border-primary/40"
+                            className="rounded-lg border border-muted bg-card p-4 transition-all hover:border-primary/40"
                         >
                             <div className="mb-4 flex items-start justify-between">
                                 <div className="flex items-center gap-2">
@@ -82,7 +82,7 @@ const ErrorCorrectionsStep = ({
                                             {index + 1}
                                         </span>
                                     </div>
-                                    <span className="font-medium text-gray-700">
+                                    <span className="font-medium text-primary">
                                         Error #{index + 1}
                                     </span>
                                 </div>
@@ -142,9 +142,9 @@ const ErrorCorrectionsStep = ({
                                                     e.target.value,
                                                 )
                                             }
-                                            className="border-gray-300"
+                                            className=""
                                         />
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs text-muted-foreground">
                                             Which description needs correction?
                                         </p>
                                     </div>
@@ -161,8 +161,8 @@ const ErrorCorrectionsStep = ({
                                                 *
                                             </span>
                                             <Badge
-                                                variant="destructive"
-                                                className="text-xs"
+                                                variant="default"
+                                                className="bg-red-600 text-xs dark:bg-red-900 dark:text-red-200"
                                             >
                                                 Incorrect
                                             </Badge>
@@ -178,7 +178,7 @@ const ErrorCorrectionsStep = ({
                                                     e.target.value,
                                                 )
                                             }
-                                            className="border-red-300 focus:border-red-500"
+                                            className="border-red-300 focus:border-red-500 dark:border-red-900"
                                         />
                                     </div>
 
@@ -193,7 +193,7 @@ const ErrorCorrectionsStep = ({
                                             </span>
                                             <Badge
                                                 variant="default"
-                                                className="bg-green-600 text-xs"
+                                                className="bg-green-600 text-xs dark:bg-green-900 dark:text-green-200"
                                             >
                                                 Correct
                                             </Badge>
@@ -209,7 +209,7 @@ const ErrorCorrectionsStep = ({
                                                     e.target.value,
                                                 )
                                             }
-                                            className="border-green-300 focus:border-green-500"
+                                            className="border-green-300 focus:border-green-500 dark:border-green-900"
                                         />
                                     </div>
                                 </div>
@@ -222,7 +222,7 @@ const ErrorCorrectionsStep = ({
                     type="button"
                     variant="outline"
                     onClick={addErrorCorrection}
-                    className="w-full cursor-pointer border-2 border-dashed hover:border-primary hover:bg-primary/10"
+                    className="w-full cursor-pointer border-2 border-dashed transition-all duration-300 hover:border-muted-foreground hover:bg-primary/10"
                 >
                     <Plus className="mr-2 h-4 w-4" />
                     Add Errors to Correct

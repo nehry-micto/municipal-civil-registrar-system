@@ -1,6 +1,12 @@
 import React from 'react';
 
-const ProgressStepper = ({ steps, currentStep }) => {
+const ProgressStepper = ({
+    steps,
+    currentStep,
+}: {
+    steps: { number: number; title: string; description: string }[];
+    currentStep: number;
+}) => {
     return (
         <div className="mb-8">
             <div className="relative flex items-center justify-between">
@@ -10,21 +16,21 @@ const ProgressStepper = ({ steps, currentStep }) => {
                             <div
                                 className={`flex h-12 w-12 items-center justify-center rounded-full font-semibold transition-all ${
                                     currentStep === step.number
-                                        ? 'scale-110 bg-blue-600 text-white shadow-lg'
+                                        ? 'scale-110 bg-primary text-primary-foreground'
                                         : currentStep > step.number
-                                          ? 'bg-green-500 text-white'
-                                          : 'border-2 border-gray-300 bg-white text-gray-400'
+                                          ? 'bg-green-500 text-primary-foreground'
+                                          : 'border-2 border-gray-300 bg-primary-foreground text-gray-400'
                                 }`}
                             >
                                 {currentStep > step.number ? '✓' : step.number}
                             </div>
                             <div className="mt-2 text-center">
                                 <div
-                                    className={`text-sm font-medium ${currentStep >= step.number ? 'text-gray-900' : 'text-gray-400'}`}
+                                    className={`text-sm font-medium ${currentStep >= step.number ? 'text-primary' : 'text-muted-foreground'}`}
                                 >
                                     {step.title}
                                 </div>
-                                <div className="hidden text-xs text-gray-500 md:block">
+                                <div className="hidden text-xs text-muted-foreground md:block">
                                     {step.description}
                                 </div>
                             </div>

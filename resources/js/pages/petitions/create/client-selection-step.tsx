@@ -54,9 +54,9 @@ const ClientSelectionStep = ({
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                <Alert className="border-blue-200 bg-blue-50">
-                    <Info className="h-4 w-4 text-blue-600" />
-                    <AlertDescription className="text-blue-800">
+                <Alert className="border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-800 dark:bg-blue-900/40 dark:text-blue-500">
+                    <Info className="h-4 w-4" />
+                    <AlertDescription className="text-blue-800 dark:text-blue-500">
                         <strong>Tip:</strong> The petitioner is the person
                         requesting the correction. This might be different from
                         the document owner.
@@ -66,7 +66,7 @@ const ClientSelectionStep = ({
                 {!formData.client_id ? (
                     <div className="space-y-4">
                         <div className="relative">
-                            <Search className="absolute top-3 left-3 h-4 w-4 text-gray-400" />
+                            <Search className="absolute top-3 left-3 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Search by name or client code..."
                                 className="pl-10"
@@ -97,18 +97,18 @@ const ClientSelectionStep = ({
                                         setData('client_id', client.id);
                                         setSelectedClient(client);
                                     }}
-                                    className="group rounded-lg border-2 border-gray-200 p-4 text-left transition-all hover:border-blue-500 hover:bg-blue-50"
+                                    className="group rounded-lg border border-muted-foreground p-4 text-left transition-all hover:border-primary hover:bg-primary/10"
                                 >
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <div className="font-semibold text-gray-900 group-hover:text-blue-700">
+                                            <div className="font-semibold text-primary group-hover:text-primary">
                                                 {client.full_name}
                                             </div>
-                                            <div className="text-sm text-gray-500">
+                                            <div className="text-sm text-muted-foreground">
                                                 {client.client_code}
                                             </div>
                                         </div>
-                                        <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600" />
+                                        <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
                                     </div>
                                 </button>
                             ))}
@@ -119,7 +119,7 @@ const ClientSelectionStep = ({
                                 <span className="w-full border-t" />
                             </div>
                             <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-white px-2 text-gray-500">
+                                <span className="bg-card px-2 text-muted-foreground">
                                     Or
                                 </span>
                             </div>
@@ -141,7 +141,7 @@ const ClientSelectionStep = ({
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        <div className="rounded-lg border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-6">
+                        <div className="rounded-lg border border-green-200 bg-emerald-50 p-6 dark:border-green-800 dark:bg-green-900/40">
                             <div className="flex items-start justify-between">
                                 <div className="flex items-start gap-3">
                                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
@@ -151,10 +151,10 @@ const ClientSelectionStep = ({
                                         <div className="mb-1 text-sm font-medium text-green-600">
                                             Selected Petitioner
                                         </div>
-                                        <div className="text-lg font-bold text-gray-900">
+                                        <div className="text-lg font-bold text-primary">
                                             {selectedClient?.full_name}
                                         </div>
-                                        <div className="text-sm text-gray-600">
+                                        <div className="text-sm text-muted-foreground">
                                             {selectedClient?.client_code}
                                         </div>
                                     </div>
@@ -174,9 +174,9 @@ const ClientSelectionStep = ({
                             </div>
                         </div>
 
-                        <Alert className="border-green-200 bg-green-50">
-                            <AlertCircle className="h-4 w-4 text-green-600" />
-                            <AlertDescription className="text-green-800">
+                        <Alert className="border-green-200 bg-green-50 text-green-600 dark:border-green-800 dark:bg-green-900/40">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription className="text-green-800 dark:text-green-600">
                                 Great! You can now proceed to enter the document
                                 details.
                             </AlertDescription>
@@ -189,10 +189,10 @@ const ClientSelectionStep = ({
                         type="button"
                         onClick={onNext}
                         disabled={!canProceed}
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="cursor-pointer"
                     >
                         Continue to Document Details
-                        <ChevronRight className="ml-2 h-4 w-4" />
+                        <ChevronRight className="size-4" />
                     </Button>
                 </div>
             </CardContent>

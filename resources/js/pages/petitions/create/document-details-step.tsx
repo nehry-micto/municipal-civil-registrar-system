@@ -58,9 +58,9 @@ const DocumentDetailsStep = ({
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                <Alert className="border-blue-200 bg-blue-50">
-                    <Info className="h-4 w-4 text-blue-600" />
-                    <AlertDescription className="text-blue-800">
+                <Alert className="border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-800 dark:bg-blue-900/40 dark:text-blue-500">
+                    <Info className="h-4 w-4" />
+                    <AlertDescription className="text-blue-800 dark:text-blue-500">
                         <strong>Note:</strong> The document owner is the person
                         whose name appears on the civil registry document. This
                         may be different from the petitioner filing this
@@ -81,9 +81,9 @@ const DocumentDetailsStep = ({
                             onChange={(e) =>
                                 setData('registry_number', e.target.value)
                             }
-                            className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                            className="0"
                         />
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                             The registry number of the document to be corrected
                         </p>
                     </div>
@@ -100,9 +100,9 @@ const DocumentDetailsStep = ({
                             onChange={(e) =>
                                 setData('date_of_filing', e.target.value)
                             }
-                            className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                            className=""
                         />
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                             When was this petition filed?
                         </p>
                     </div>
@@ -132,7 +132,7 @@ const DocumentDetailsStep = ({
                                 ))}
                             </SelectContent>
                         </Select>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                             Type of civil registry document
                         </p>
                     </div>
@@ -169,7 +169,7 @@ const DocumentDetailsStep = ({
                                 ))}
                             </SelectContent>
                         </Select>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                             Set as urgent if time-sensitive
                         </p>
                     </div>
@@ -186,7 +186,7 @@ const DocumentDetailsStep = ({
                             onChange={(e) =>
                                 setData('document_owner', e.target.value)
                             }
-                            className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                            className=""
                         />
                         <div className="flex items-center">
                             <Checkbox
@@ -208,7 +208,7 @@ const DocumentDetailsStep = ({
                                 Same as petitioner
                             </Label>
                         </div>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                             The name that appears on the document (may differ
                             from petitioner)
                         </p>
@@ -227,9 +227,9 @@ const DocumentDetailsStep = ({
                             onChange={(e) =>
                                 setData('petition_nature', e.target.value)
                             }
-                            className="resize-none border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                            className="resize-none"
                         />
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                             Explain why this correction is needed and the legal
                             basis
                         </p>
@@ -249,10 +249,10 @@ const DocumentDetailsStep = ({
                         type="button"
                         onClick={onNext}
                         disabled={!canProceed}
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="cursor-pointer"
                     >
                         Continue to Corrections
-                        <ChevronRight className="ml-2 h-4 w-4" />
+                        <ChevronRight className="size-4" />
                     </Button>
                 </div>
             </CardContent>

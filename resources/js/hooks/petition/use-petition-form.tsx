@@ -8,6 +8,8 @@ const usePetitionForm = () => {
         setData,
         errors,
         reset,
+        post,
+        processing,
     } = useForm<PetitionForm>({
         client_id: '',
         registry_number: '',
@@ -54,6 +56,8 @@ const usePetitionForm = () => {
 
     return {
         formData,
+        processing,
+        post,
         addErrorCorrection,
         removeErrorCorrection,
         updateErrorCorrection,

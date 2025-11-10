@@ -24,6 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     ], function () {
         Route::get('/', 'index')->name('index');
         Route::get('/create', 'create')->name('create');
+        Route::post('/store', 'store')->name('store');
     });
 
 
@@ -35,7 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ],
         function () {
             Route::get('/', 'index')->name('index');
-            // Route::get('/create', 'create')->name('create');
+            Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');
         }
     );

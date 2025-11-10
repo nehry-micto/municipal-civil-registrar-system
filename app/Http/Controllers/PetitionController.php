@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PetitionRequest;
 use App\Models\Client;
 use App\Models\Petition;
 use Illuminate\Http\Request;
@@ -53,9 +54,18 @@ class PetitionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(PetitionRequest $request)
     {
-        //
+        Petition::create($request->only([
+            'client_id',
+            'registry_number',
+            'date_of_filing',
+            'document_type',
+            'document_owner',
+            'petition_nature',
+            'errors_to_correct',
+            'priority',
+        ]));
     }
 
     /**
