@@ -97,7 +97,7 @@ const ClientSelectionStep = ({
                                         setData('client_id', client.id);
                                         setSelectedClient(client);
                                     }}
-                                    className="group rounded-lg border border-muted-foreground p-4 text-left transition-all hover:border-primary hover:bg-primary/10"
+                                    className="group rounded-lg border border-muted-foreground/50 p-4 text-left transition-all hover:border-primary hover:bg-primary/10"
                                 >
                                     <div className="flex items-center justify-between">
                                         <div>

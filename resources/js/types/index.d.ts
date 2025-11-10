@@ -66,6 +66,7 @@ export interface PetitionForm {
     date_of_filing: string;
     document_type: string;
     document_owner: string;
+    petition_type: string;
     petition_nature: string;
     errors_to_correct: ErrorsToCorrect[];
     priority: string;

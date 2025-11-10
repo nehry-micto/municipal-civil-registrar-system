@@ -6,6 +6,7 @@ use App\Enums\DocumentType;
 use App\Enums\PetitionPriority;
 use App\Enums\PetitionStatus;
 use App\Enums\PetitionStep;
+use App\Enums\PetitionType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,8 +24,9 @@ class Petition extends Model
         'petition_number',
         'registry_number',
         'date_of_filing',
-        'document_type',
-        'petition_nature',
+        'document_type',   # type of document
+        'petition_type',  # type of petition
+        'petition_nature', # type and nature of petition
         'document_owner',
         'errors_to_correct',
         'current_step',
@@ -43,9 +45,11 @@ class Petition extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'document_type' => DocumentType::class,
+            'petition_type' => PetitionType::class,
             'current_step' => PetitionStep::class,
             'status' => PetitionStatus::class,
             'priority' => PetitionPriority::class,
+
         ];
     }
 

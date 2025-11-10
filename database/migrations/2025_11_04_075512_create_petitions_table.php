@@ -35,6 +35,8 @@ return new class extends Migration
             $table->date('date_of_filing');
             // document type 1 = birth, 2 = death
             $table->unsignedTinyInteger('document_type');
+            #type of petition
+            $table->unsignedTinyInteger('petition_type');
             # petition nature type
             $table->text('petition_nature');
             # Name on the document (might differ from petitioner)
