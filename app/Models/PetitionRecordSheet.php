@@ -8,4 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class PetitionRecordSheet extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'petition_id',
+        'first_published_at',
+        'second_published_at',
+        'rendered_date',
+        'remarks',
+        'decision',
+    ];
 }

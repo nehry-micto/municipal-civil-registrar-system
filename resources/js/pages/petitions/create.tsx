@@ -2,7 +2,13 @@ import usePetitionForm from '@/hooks/petition/use-petition-form';
 import useStepWizard from '@/hooks/petition/use-setup-wizard';
 import AppLayout from '@/layouts/app-layout';
 import petitions from '@/routes/petitions';
-import { BreadcrumbItem, Client, DocumentType, Priority } from '@/types';
+import {
+    BreadcrumbItem,
+    Client,
+    DocumentType,
+    PetitionType,
+    Priority,
+} from '@/types';
 import { usePage } from '@inertiajs/react';
 import { FileText } from 'lucide-react';
 import ClientSelectionStep from './create/client-selection-step';
@@ -44,11 +50,17 @@ const Create = () => {
         },
     ];
 
+    const petitionTypes: PetitionType[] = [
+        { value: '0', label: 'Correction of Clerical Error' },
+        { value: '1', label: 'Other' },
+    ];
+
     // Custom hooks
     const { currentStep, nextStep, previousStep } = useStepWizard(3);
     const {
         post,
         formData,
+        errors,
         setData,
         addErrorCorrection,
         removeErrorCorrection,
@@ -102,6 +114,8 @@ const Create = () => {
                         formData={formData}
                         setData={setData}
                         documentTypes={documentTypes}
+                        petitionTypes={petitionTypes}
+                        errors={errors}
                         priorities={priorities}
                         selectedClient={selectedClient}
                         onNext={nextStep}

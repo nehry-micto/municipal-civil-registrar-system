@@ -12,9 +12,11 @@ const usePetitionForm = () => {
         processing,
     } = useForm<PetitionForm>({
         client_id: '',
+        petition_number: '',
         registry_number: '',
-        date_of_filing: '',
+        date_of_filing: new Date().toISOString().split('T')[0],
         document_type: '',
+        petition_type: '0',
         document_owner: '',
         petition_nature: '',
         errors_to_correct: [],

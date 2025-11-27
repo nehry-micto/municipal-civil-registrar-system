@@ -1,3 +1,4 @@
+import InputError from '@/components/input-error';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,14 +20,23 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Client, DocumentType, PetitionForm, Priority } from '@/types';
+import {
+    Client,
+    DocumentType,
+    PetitionForm,
+    PetitionType,
+    Priority,
+} from '@/types';
+import { FormDataErrors } from '@inertiajs/core';
 import { ChevronRight, FileText, Info } from 'lucide-react';
 
 const DocumentDetailsStep = ({
     formData,
+    errors,
     selectedClient,
     setData,
     documentTypes,
+    petitionTypes,
     priorities,
     onNext,
     onPrevious,
@@ -35,9 +45,11 @@ const DocumentDetailsStep = ({
     selectedClient: Client | null;
     setData: (field: string, value: string) => void;
     documentTypes: DocumentType[];
+    petitionTypes: PetitionType[];
     priorities: Priority[];
     onNext: () => void;
     onPrevious: () => void;
+    errors: FormDataErrors<PetitionForm>;
 }) => {
     const canProceed =
         formData.registry_number &&
@@ -68,7 +80,29 @@ const DocumentDetailsStep = ({
                     </AlertDescription>
                 </Alert>
 
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="space-y-2">
+                        <Label htmlFor="petition_number">
+                            Petition Number{' '}
+                            <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                            id="petition_number"
+                            placeholder="e.g., CCE-0157-2025"
+                            value={formData.petition_number}
+                            onChange={(e) =>
+                                setData('petition_number', e.target.value)
+                            }
+                            className=""
+                            aria-invalid={
+                                errors?.petition_number ? true : false
+                            }
+                        />
+                        <InputError message={errors?.petition_number} />
+                        <p className="text-xs text-muted-foreground">
+                            The petition number of the document to be corrected
+                        </p>
+                    </div>
                     <div className="space-y-2">
                         <Label htmlFor="registry_number">
                             Registry Number{' '}
@@ -76,13 +110,17 @@ const DocumentDetailsStep = ({
                         </Label>
                         <Input
                             id="registry_number"
-                            placeholder="e.g., 2024-001234"
+                            placeholder="e.g., 2022-193"
                             value={formData.registry_number}
                             onChange={(e) =>
                                 setData('registry_number', e.target.value)
                             }
-                            className="0"
+                            className=""
+                            aria-invalid={
+                                errors?.registry_number ? true : false
+                            }
                         />
+                        <InputError message={errors?.registry_number} />
                         <p className="text-xs text-muted-foreground">
                             The registry number of the document to be corrected
                         </p>
@@ -101,7 +139,9 @@ const DocumentDetailsStep = ({
                                 setData('date_of_filing', e.target.value)
                             }
                             className=""
+                            aria-invalid={errors?.date_of_filing ? true : false}
                         />
+                        <InputError message={errors?.date_of_filing} />
                         <p className="text-xs text-muted-foreground">
                             When was this petition filed?
                         </p>
@@ -109,7 +149,7 @@ const DocumentDetailsStep = ({
 
                     <div className="space-y-2">
                         <Label htmlFor="document_type">
-                            Document Type{' '}
+                            Type of Document
                             <span className="text-red-500">*</span>
                         </Label>
                         <Select
@@ -117,6 +157,7 @@ const DocumentDetailsStep = ({
                             onValueChange={(value) =>
                                 setData('document_type', value)
                             }
+                            aria-invalid={errors?.document_type ? true : false}
                         >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select document type" />
@@ -132,8 +173,45 @@ const DocumentDetailsStep = ({
                                 ))}
                             </SelectContent>
                         </Select>
+                        <InputError message={errors?.document_type} />
                         <p className="text-xs text-muted-foreground">
                             Type of civil registry document
+                        </p>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="petition_type">
+                            Type of Petition
+                            <span className="text-red-500">*</span>
+                        </Label>
+                        <Select
+                            value={formData.petition_type}
+                            onValueChange={(value) => {
+                                setData('petition_type', value);
+                            }}
+                            aria-invalid={errors?.petition_type ? true : false}
+                        >
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {petitionTypes.map(
+                                    (petitionType: PetitionType) => (
+                                        <SelectItem
+                                            key={petitionType.value}
+                                            value={petitionType.value}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                {petitionType.label}
+                                            </div>
+                                        </SelectItem>
+                                    ),
+                                )}
+                            </SelectContent>
+                        </Select>
+                        <InputError message={errors?.petition_type} />
+                        <p className="text-xs text-muted-foreground">
+                            Type of petition to be filed
                         </p>
                     </div>
 
@@ -144,6 +222,7 @@ const DocumentDetailsStep = ({
                             onValueChange={(value) => {
                                 setData('priority', value);
                             }}
+                            aria-invalid={errors?.priority ? true : false}
                         >
                             <SelectTrigger>
                                 <SelectValue />
@@ -169,12 +248,12 @@ const DocumentDetailsStep = ({
                                 ))}
                             </SelectContent>
                         </Select>
+                        <InputError message={errors?.priority} />
                         <p className="text-xs text-muted-foreground">
                             Set as urgent if time-sensitive
                         </p>
                     </div>
-
-                    <div className="space-y-2 md:col-span-2">
+                    <div className="col-span-full space-y-2">
                         <Label htmlFor="document_owner">
                             Document Owner Name
                             <span className="text-red-500">*</span>
@@ -186,8 +265,10 @@ const DocumentDetailsStep = ({
                             onChange={(e) =>
                                 setData('document_owner', e.target.value)
                             }
+                            aria-invalid={errors?.document_owner ? true : false}
                             className=""
                         />
+                        <InputError message={errors?.document_owner} />
                         <div className="flex items-center">
                             <Checkbox
                                 className="mr-2"
@@ -214,9 +295,9 @@ const DocumentDetailsStep = ({
                         </p>
                     </div>
 
-                    <div className="space-y-2 md:col-span-2">
+                    <div className="col-span-full space-y-2">
                         <Label htmlFor="petition_nature">
-                            Nature of Petition{' '}
+                            Type and Nature of Petition
                             <span className="text-red-500">*</span>
                         </Label>
                         <Textarea
@@ -227,8 +308,12 @@ const DocumentDetailsStep = ({
                             onChange={(e) =>
                                 setData('petition_nature', e.target.value)
                             }
+                            aria-invalid={
+                                errors?.petition_nature ? true : false
+                            }
                             className="resize-none"
                         />
+                        <InputError message={errors?.petition_nature} />
                         <p className="text-xs text-muted-foreground">
                             Explain why this correction is needed and the legal
                             basis

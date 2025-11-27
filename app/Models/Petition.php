@@ -57,4 +57,24 @@ class Petition extends Model
     {
         return $this->belongsTo(Client::class);
     }
+
+    public function notice()
+    {
+        return $this->hasOne(PetitionNotice::class);
+    }
+
+    public function certificate()
+    {
+        return $this->hasOne(PetitionCertificate::class);
+    }
+
+    public function recordSheet()
+    {
+        return $this->hasOne(PetitionRecordSheet::class);
+    }
+
+    public function finality()
+    {
+        return $this->hasOne(PetitionFinality::class);
+    }
 }

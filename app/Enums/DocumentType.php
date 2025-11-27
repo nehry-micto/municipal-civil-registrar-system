@@ -22,4 +22,12 @@ enum DocumentType: int
             self::DEATH => 1,
         };
     }
+
+    public function name(): string
+    {
+        return match ($this) {
+            self::BIRTH => 'Birth Certificate',
+            self::DEATH => 'Death Certificate',
+        };
+    }
 }

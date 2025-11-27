@@ -62,6 +62,7 @@ export interface ErrorsToCorrect {
 
 export interface PetitionForm {
     client_id: string;
+    petition_number: string;
     registry_number: string;
     date_of_filing: string;
     document_type: string;
@@ -71,6 +72,14 @@ export interface PetitionForm {
     errors_to_correct: ErrorsToCorrect[];
     priority: string;
 }
+
+export interface Petition extends PetitionForm {
+    id: string;
+    next_step: string;
+    next_step_id: string;
+    created_at: string;
+    updated_at: string;
+}
 interface Option {
     value: string;
     label: string;
@@ -79,3 +88,5 @@ interface Option {
 export type DocumentType = Option;
 
 export type Priority = Option;
+
+export type PetitionType = Option;

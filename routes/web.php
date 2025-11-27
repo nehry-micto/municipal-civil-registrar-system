@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CertificateGeneratorController;
 use App\Http\Controllers\PetitionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -25,8 +26,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/create', 'create')->name('create');
         Route::post('/store', 'store')->name('store');
+        Route::delete('/{petition}', 'destroy')->name('destroy');
+        Route::post('/{petition}', 'changeStep')->name('changeStep');
     });
-
 
     Route::group(
         [
@@ -40,6 +42,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/store', 'store')->name('store');
         }
     );
+
+    Route::get('petitions/{petition}/generate-notice', [CertificateGeneratorController::class, 'generateNoticeOfPosting'])->name('certificate-generator.notice');
+    Route::get('petitions/{petition}/generate-certificate-of-posting', [CertificateGeneratorController::class, 'generateCertificateOfPosting'])->name('certificate-generator.certificate-of-posting');
 });
 
 require __DIR__ . '/settings.php';

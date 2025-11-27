@@ -1,0 +1,595 @@
+import UIPagination from '@/components/shared/ui-pagination';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+} from '@/components/ui/hover-card';
+import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { default as petitionsRoute } from '@/routes/petitions';
+import { ErrorsToCorrect, Petition } from '@/types';
+import { Link, router, usePage } from '@inertiajs/react';
+import {
+    ColumnDef,
+    flexRender,
+    getCoreRowModel,
+    useReactTable,
+} from '@tanstack/react-table';
+import { debounce, pickBy } from 'lodash';
+import {
+    ArrowRight,
+    Columns,
+    Edit2,
+    EllipsisIcon,
+    InfoIcon,
+    PlusCircleIcon,
+    Search,
+    TrashIcon,
+    DownloadIcon,
+    CheckCircle,
+    Lock,
+} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { usePrevious } from 'react-use';
+import { toast } from 'sonner';
+import PostingNotice from '../posting-notice';
+import PostingCertificate from '../posting-certificate';
+import RecordSheet from '../record-sheet';
+import FinalityCertificate from '../finality-certificate';
+import { Spinner } from '@/components/ui/spinner';
+import { Skeleton } from '@/components/ui/skeleton';
+import certificateGenerator from '@/routes/certificate-generator';
+
+const tabs = [
+    {
+        value: 'all',
+        label: 'All',
+    },
+    {
+        value: 'encoding',
+        label: 'Encoding',
+    },
+    {
+        value: 'posting_notice',
+        label: 'Notice of Posting',
+    },
+    {
+        value: 'posting_certificate',
+        label: 'Certificate of posting',
+    },
+    {
+        value: 'record_sheet',
+        label: 'Record sheet',
+    },
+    {
+        value: 'finality_certificate',
+        label: 'Certificate of finality',
+    },
+];
+
+const PetitionTable = () => {
+    const [selectedRecord, setSelectedRecord] = useState<Petition | null>(null);
+
+    const { petitions, filters, petitionSteps } = usePage<{
+        petitions?: {
+            data: Petition[];
+            links: { url: string | null; label: string; active: boolean }[];
+            last_page: number;
+        };
+        filters?: {
+            tab?: string;
+            search?: string;
+            column?: string;
+            sortDirection?: string;
+            trashedRecords?: number;
+        };
+        petitionSteps: {
+            value: number;
+            label: string;
+            description: string;
+        }[];
+    }>().props;
+
+    const [values, setValues] = useState({
+        search: filters?.search || '',
+        column: filters?.column || '',
+        sortDirection: filters?.sortDirection || '',
+        trashedRecords: filters?.trashedRecords || '',
+        tab: filters?.tab || '',
+    });
+
+    const [columnVisibility, setColumnVisibility] = useState<
+        Record<string, boolean>
+    >(() => {
+        const saved = localStorage.getItem('petitionTableColumnVisibility');
+        return saved ? JSON.parse(saved) : {};
+    });
+
+    const columns = useMemo<ColumnDef<Petition, object>[]>(
+        () => [
+            {
+                id: 'actions',
+                header: '',
+                cell: (info) => (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <EllipsisIcon />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                                <Link
+                                // href={route(
+                                //     'locational-clearance-applications.edit',
+                                //     info.row.original.id,
+                                // )}
+                                >
+                                    <Edit2 className="mr-2 size-4" /> Edit
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link
+                                    className="w-full"
+                                    method="delete"
+                                    as="button"
+                                    href={petitionsRoute.destroy.url(
+                                        info.row.original.id,
+                                    )}
+                                    onSuccess={() =>
+                                        toast.success(
+                                            'Record deleted successfully!',
+                                        )
+                                    }
+                                    preserveScroll
+                                    preserveState
+                                >
+                                    <TrashIcon className="mr-2 size-4 text-red-600" />{' '}
+                                    Delete
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel>Workflow Steps</DropdownMenuLabel>
+                            {petitionSteps.map((step) => {
+                                const currentStepIndex = petitionSteps.findIndex(s => s.label === info.row.original.next_step);
+                                const stepIndex = step.value;
+                                const isCompleted = stepIndex < currentStepIndex;
+                                const isCurrent = stepIndex === currentStepIndex;
+                                const isFuture = stepIndex > currentStepIndex;
+
+                                return (
+                                    <DropdownMenuItem
+                                        key={step.value}
+                                        disabled={isFuture}
+                                        onClick={() => {
+                                            if (isCurrent) {
+                                                setSelectedRecord(info.row.original);
+                                            } else if (isCompleted) {
+                                                if (step.label === 'Notice of Posting') {
+                                                    // @ts-ignore
+                                                    window.open(certificateGenerator.notice.url(info.row.original.id), '_blank');
+                                                } else if (step.label === 'Certificate of Posting') {
+                                                    window.open(`/petitions/${info.row.original.id}/generate-certificate-of-posting`, '_blank');
+                                                }
+                                            }
+                                        }}
+                                    >
+                                        {isCompleted ? (
+                                            <CheckCircle className="mr-2 size-4 text-green-500" />
+                                        ) : isFuture ? (
+                                            <Lock className="mr-2 size-4 text-muted-foreground" />
+                                        ) : (
+                                            <ArrowRight className="mr-2 size-4" />
+                                        )}
+                                        
+                                        <span className={isCompleted ? 'text-green-600' : ''}>
+                                            {step.label}
+                                        </span>
+
+                                        {isCompleted && (step.label === 'Notice of Posting' || step.label === 'Certificate of Posting') && (
+                                            <DownloadIcon className="ml-auto size-4" />
+                                        )}
+                                    </DropdownMenuItem>
+                                );
+                            })}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                ),
+            },
+            {
+                accessorKey: 'petition_number',
+                header: 'Petition No.',
+                cell: (info) => (
+                    <Badge variant="secondary">
+                        {info.getValue().toString()}
+                    </Badge>
+                ),
+            },
+            { accessorKey: 'registry_number', header: 'Registry No.' },
+            { accessorKey: 'date_of_filing', header: 'Date of Filing' },
+            { accessorKey: 'document_owner', header: 'Document Owner' },
+            { accessorKey: 'document_type', header: 'Document Type' },
+            { accessorKey: 'petition_type', header: 'Petition Type' },
+            { accessorKey: 'petition_nature', header: 'Petition Nature' },
+            {
+                accessorKey: 'errors_to_correct',
+                header: 'Errors to Correct',
+                cell: (info) => {
+                    const errors = info.getValue() as ErrorsToCorrect[];
+                    return (
+                        <HoverCard>
+                            <HoverCardTrigger asChild>
+                                <Badge variant="destructive">
+                                    {errors[0]?.description || 'No Errors'}
+                                    {errors.length > 1 && (
+                                        <Badge
+                                            variant="secondary"
+                                            className="ml-1 size-3.5 text-[10px] text-destructive"
+                                        >
+                                            {errors.length}
+                                        </Badge>
+                                    )}
+                                </Badge>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="">
+                                <Table className="text-xs">
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>#</TableHead>
+                                            <TableHead>Description</TableHead>
+                                            <TableHead>Current</TableHead>
+                                            <TableHead>Corrected</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {errors.map((error) => (
+                                            <TableRow key={error.description}>
+                                                <TableCell>
+                                                    {error.item_number}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {error.description}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {error.corrected_value}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {error.corrected_value}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </HoverCardContent>
+                        </HoverCard>
+                    );
+                },
+            },
+            {
+                accessorKey: 'priority',
+                header: 'Priority',
+
+                cell: (info) => {
+                    const priority =
+                        {
+                            0: 'Normal',
+                            1: 'Urgent',
+                        }[info.getValue().toString()] ?? 'Unknown';
+
+                    return (
+                        <Badge
+                            variant={
+                                (priority === 'Urgent' &&
+                                    'destructive') as 'destructive'
+                            }
+                        >
+                            {priority}
+                        </Badge>
+                    );
+                },
+            },
+            {
+                accessorKey: 'created_at',
+                header: 'Created At',
+                cell: (info) => info.getValue(),
+            },
+            {
+                accessorKey: 'updated_at',
+                header: 'Updated At',
+                cell: (info) => info.getValue(),
+            },
+        ],
+        [],
+    );
+
+    const page = usePage();
+
+    const prevValues = usePrevious(values);
+
+    const debounceFilter = useMemo(
+        () =>
+            debounce((query) => {
+                router.get(page.url, query, {
+                    preserveState: true,
+                    replace: true,
+                });
+            }, 300),
+        [page.url],
+    );
+    
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (prevValues) {
+            setIsLoading(true);
+            const query = Object.keys(pickBy(values)).length
+                ? pickBy(values)
+                : {};
+            debounceFilter(query);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [values]);
+
+
+    useEffect(() => {
+        // const removeStartListener = router.on('start', () => {
+        //     setIsLoading(true);
+        // });
+        const removeFinishListener = router.on('finish', () => {
+            setIsLoading(false);
+        });
+
+        return () => {
+            // removeStartListener();
+            removeFinishListener();
+        };
+    }, []);
+
+    const table = useReactTable({
+        data: petitions?.data || [],
+        columns,
+        state: { columnVisibility },
+        getCoreRowModel: getCoreRowModel(),
+        onColumnVisibilityChange: (updater) => {
+            setColumnVisibility((prev) => {
+                const newVisibility =
+                    typeof updater === 'function' ? updater(prev) : updater;
+                localStorage.setItem(
+                    'locationalTableColumnVisibility',
+                    JSON.stringify(newVisibility),
+                );
+                return newVisibility;
+            });
+        },
+    });
+
+    return (
+        <div className="p-4">
+            <PostingNotice
+                selectedRecord={selectedRecord}
+                setSelectedRecord={setSelectedRecord}
+            />
+            <PostingCertificate
+                selectedRecord={selectedRecord}
+                setSelectedRecord={setSelectedRecord}
+            />
+            <RecordSheet
+                selectedRecord={selectedRecord}
+                setSelectedRecord={setSelectedRecord}
+            />
+            <FinalityCertificate
+                selectedRecord={selectedRecord}
+                setSelectedRecord={setSelectedRecord}
+            />
+            <div className="flex items-center justify-between gap-2">
+                <div className="flex w-full items-center gap-2">
+                    <div className="relative flex w-full max-w-sm items-center">
+                        <Input
+                            onChange={(e) =>
+                                setValues({ ...values, search: e.target.value })
+                            }
+                            value={values.search}
+                            placeholder="Search..."
+                        />
+                        <Search className="absolute right-3 size-4" />
+                    </div>
+                    <Select
+                        value={values.trashedRecords.toString()}
+                        name="trashRecords"
+                        onValueChange={(value) => {
+                            setValues({
+                                ...values,
+                                trashedRecords: value,
+                            });
+                        }}
+                    >
+                        <SelectTrigger className="w-[120px]">
+                            <SelectValue placeholder="Trashed" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="1">No deleted</SelectItem>
+                            <SelectItem value="2">Deleted</SelectItem>
+                            <SelectItem value="3">All records</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    {
+                        // check if filters are empty and show the clear button
+                        Object.keys(pickBy(values)).length > 0 && (
+                            <Button
+                                variant="destructive"
+                                onClick={() =>
+                                    router.get(petitionsRoute.index().url)
+                                }
+                            >
+                                Clear
+                            </Button>
+                        )
+                    }
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className="flex items-center gap-1"
+                            >
+                                <Columns className="size-4" /> Columns
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            {table.getAllLeafColumns().map(
+                                (column) =>
+                                    column.getCanHide() && (
+                                        <DropdownMenuCheckboxItem
+                                            key={column.id}
+                                            checked={column.getIsVisible()}
+                                            onCheckedChange={() =>
+                                                column.toggleVisibility()
+                                            }
+                                        >
+                                            {column.columnDef.header?.toString()}
+                                        </DropdownMenuCheckboxItem>
+                                    ),
+                            )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+                <div>
+                    <Button size={'sm'} asChild>
+                        <Link href={petitionsRoute.create().url}>
+                            <PlusCircleIcon /> Create Petition
+                        </Link>
+                    </Button>
+                </div>
+            </div>
+            <div className="overflow-x-auto">
+                <Tabs
+                    onValueChange={(value: string) => {
+                        setValues({
+                            ...values,
+                            tab: value,
+                        });
+                    }}
+                    defaultValue="encoding"
+                    className="mt-8 mb-4"
+                >
+                    <TabsList className="">
+                        {tabs.map((tab) => (
+                            <TabsTrigger key={tab.value} value={tab.value}>
+                                {tab.label}
+                            </TabsTrigger>
+                        ))}
+                    </TabsList>
+                </Tabs>
+            </div>
+
+            <div className="mt-4 overflow-auto">
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <TableRow className="" key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => (
+                                    <TableHead key={header.id}>
+                                        {flexRender(
+                                            header.column.columnDef.header,
+                                            header.getContext(),
+                                        )}
+                                    </TableHead>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {isLoading ? (
+                            Array.from({
+                                length: 2,
+                            }).map((_, index) => (
+                                <TableRow key={index}>
+                                    {
+                                        columns.map((column, index) => (
+                                            <TableCell
+                                            key={index}
+                                            className="text-center m-2"
+                                        >
+                                            <Skeleton className="h-4 w-full px-4" />
+                                        </TableCell>
+                                    ))
+                                }
+                            </TableRow>) 
+                        )) : table.getRowModel().rows.length > 0 ? (
+                            table.getRowModel().rows.map((row) => (
+                                <TableRow
+                                    className="cursor-pointer"
+                                    key={row.id}
+                                    // onDoubleClick={() =>
+                                    //     router.visit(
+                                    //         route(
+                                    //             'locational-clearance-applications.edit',
+                                    //             row.original.id,
+                                    //         ),
+                                    //     )
+                                    // }
+                                >
+                                    {row.getVisibleCells().map((cell) => (
+                                        <TableCell key={cell.id}>
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext(),
+                                            )}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="text-center"
+                                >
+                                    <div className="mt-8 flex flex-col items-center justify-center gap-2 text-primary/70">
+                                        <InfoIcon className="size-8" />
+                                        <p className="text-sm font-semibold">
+                                            No {values.tab.replace(/_/g, ' ')}{' '}
+                                            records found
+                                        </p>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+                {(petitions?.last_page ?? 0) > 1 && (
+                    <UIPagination links={petitions?.links ?? []} />
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default PetitionTable;

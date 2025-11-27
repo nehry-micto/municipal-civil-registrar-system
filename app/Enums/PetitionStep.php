@@ -40,6 +40,7 @@ enum PetitionStep: int
             self::CERT_POSTING => self::RECORD_SHEET,
             self::RECORD_SHEET => self::FINALITY,
             self::FINALITY => null,
+            default => null,
         };
     }
 
@@ -51,6 +52,7 @@ enum PetitionStep: int
             self::CERT_POSTING => self::NOTICE,
             self::RECORD_SHEET => self::CERT_POSTING,
             self::FINALITY => self::RECORD_SHEET,
+            default => null,
         };
     }
 

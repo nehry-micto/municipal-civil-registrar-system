@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\PetitionStep;
 use App\Http\Requests\PetitionRequest;
+use App\Http\Resources\PetitionResource;
 use App\Models\Client;
 use App\Models\Petition;
 use Illuminate\Http\Request;
@@ -13,9 +15,68 @@ class PetitionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Inertia::render('petitions/index');
+        $validated = $request->validate([
+            'sortDirection' => 'string|in:asc,desc',
+            'column' => 'string|in:name,amount,full_name,created_at',
+            'search' => 'string|max:255',
+            'perPage' => 'integer|between:1,100',
+            'tab' => 'string|in:all,encoding,posting_notice,posting_certificate,record_sheet,finality_certificate',
+            'trashedRecords' => 'in:1,2,3',
+        ]);
+
+        $sortDirection = $validated['sortDirection'] ?? 'asc';
+        $column = $validated['column'] ?? 'created_at';
+        $search = $validated['search'] ?? '';
+        $perPage = $validated['perPage'] ?? 10;
+        $trashedRecords = $validated['trashedRecords'] ?? 0;
+
+        $query = Petition::with('client')
+            ->when($search, function ($query) use ($search) {
+                return $query->whereAny(
+                    [
+                        'petition_number',
+                        'registry_number',
+                    ],
+                    'ILIKE',
+                    "%" . $search . "%"
+                );
+            })->when($trashedRecords, function ($query) use ($trashedRecords) {
+
+                if ($trashedRecords == 2) {
+                    return $query->onlyTrashed();
+                }
+
+                if ($trashedRecords == 3) {
+                    return $query->withTrashed();
+                }
+            });
+
+        $tab = [
+            'encoding' => PetitionStep::ENCODING,
+            'posting_notice' => PetitionStep::NOTICE,
+            'posting_certificate' => PetitionStep::CERT_POSTING,
+            'record_sheet' => PetitionStep::RECORD_SHEET,
+            'finality_certificate' => PetitionStep::FINALITY
+        ][$request->tab] ?? ($request->tab === 'all' ? false : PetitionStep::ENCODING);
+
+
+        if ($tab !== false) {
+            $query->where('current_step', $tab);
+        }
+
+        $petitions = PetitionResource::collection(
+            $query->orderBy($column, $sortDirection)
+                ->paginate($perPage)
+                ->withQueryString()
+        );
+
+
+        return Inertia::render('petitions/index', [
+            'petitions' => $petitions,
+            'filters' => $validated
+        ]);
     }
 
     /**
@@ -56,16 +117,21 @@ class PetitionController extends Controller
      */
     public function store(PetitionRequest $request)
     {
+
         Petition::create($request->only([
             'client_id',
+            'petition_number',
             'registry_number',
             'date_of_filing',
             'document_type',
             'document_owner',
+            'petition_type',
             'petition_nature',
             'errors_to_correct',
             'priority',
         ]));
+
+        return to_route('petitions.index');
     }
 
     /**
@@ -98,5 +164,92 @@ class PetitionController extends Controller
     public function destroy(Petition $petition)
     {
         //
+    }
+
+    public function changeStep(Request $request, Petition $petition)
+    {
+
+        $nextStep = $petition->current_step->next();
+
+        if ($nextStep === PetitionStep::NOTICE) {
+            // validate the time
+            $request->validate([
+                'notice_date' => 'required|date',
+                // already exists
+            ]);
+
+            $petition->update([
+                'current_step' => $nextStep,
+            ]);
+
+            $petition->notice()->create([
+                'notice_posting_date' => $request->notice_date,
+            ]);
+
+            // return to_route('petitions.index');
+        }
+
+        if ($nextStep === PetitionStep::CERT_POSTING) {
+            $request->validate([
+                'start_date' => 'required|date|after:notice_posting_date',
+                'end_date' => 'required|date|after:start_date',
+            ]);
+
+            // check if start date is greater than the notice posting date
+            $noticePostingDate = $petition->notice->notice_posting_date;
+
+            if ($request->date('start_date')->lessThanOrEqualTo($noticePostingDate)) {
+                return back()->withErrors(['start_date' => 'Start date must be after the notice posting date.']);
+            }
+
+            $petition->update([
+                'current_step' => $nextStep,
+            ]);
+
+            $petition->certificate()->create([
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+            ]);
+        }
+
+        if ($nextStep === PetitionStep::RECORD_SHEET) {
+            $request->validate([
+                'first_published_at' => 'required|date',
+                'second_published_at' => 'nullable|date',
+                'rendered_date' => 'required|date',
+                'remarks' => 'nullable|string',
+                'decision' => 'required|in:1,0', // 1 = Approved, 0 = Denied (assuming)
+            ]);
+
+            $petition->update([
+                'current_step' => $nextStep,
+            ]);
+
+            $petition->recordSheet()->create([
+                'first_published_at' => $request->first_published_at,
+                'second_published_at' => $request->second_published_at,
+                'rendered_date' => $request->rendered_date,
+                'remarks' => $request->remarks,
+                'decision' => $request->decision,
+            ]);
+        }
+
+        if ($nextStep === PetitionStep::FINALITY) {
+            $request->validate([
+                'certificate_number' => 'required|unique:petition_finalities,certificate_number',
+                'released_at' => 'nullable|date',
+                'notes' => 'nullable|string',
+            ]);
+
+            $petition->update([
+                'current_step' => $nextStep,
+            ]);
+
+            $petition->finality()->create([
+                'certificate_number' => $request->certificate_number,
+                'released_at' => $request->released_at,
+                'notes' => $request->notes,
+            ]);
+        }
     }
 }

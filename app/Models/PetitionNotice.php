@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class PetitionNotice extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'petition_id',
+        'notice_posting_date',
+    ];
 }

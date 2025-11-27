@@ -1,9 +1,8 @@
-import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import petitions from '@/routes/petitions';
 import { BreadcrumbItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { PlusCircleIcon } from 'lucide-react';
+import { Head } from '@inertiajs/react';
+import PetitionTable from './create/datatable/petition-table';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -14,15 +13,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const Index = () => {
     return (
-        <div className="p-4">
-            <div>
-                <Button variant={'outline'} size={'sm'} asChild>
-                    <Link href={petitions.create().url}>
-                        <PlusCircleIcon /> Create Petition
-                    </Link>
-                </Button>
+        <>
+            <Head title="Petitions" />
+            <div className="p-4">
+                <PetitionTable />
             </div>
-        </div>
+        </>
     );
 };
 
