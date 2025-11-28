@@ -65,6 +65,11 @@ const Show = ({ petition }: { petition: Petition }) => {
                         {currentStepIndex === petitionSteps.length ? 'Completed' : 'In Progress'}
                     </Badge>
                 </div>
+                <Button asChild variant="outline" size="sm">
+                    <Link href={petitions.edit(petition.id).url}>
+                        Edit Petition
+                    </Link>
+                </Button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

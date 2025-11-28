@@ -105,7 +105,7 @@ class PetitionController extends Controller
         // dd($clients);
 
         return Inertia::render(
-            'petitions/create',
+            'petitions/create/index',
             [
                 'clients' => $clients
             ]
@@ -151,15 +151,45 @@ class PetitionController extends Controller
      */
     public function edit(Petition $petition)
     {
-        //
+        return Inertia::render('petitions/edit/index', [
+            'petition' => $petition->load(['client', 'notice', 'certificate', 'recordSheet', 'finality']),
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Petition $petition)
+    public function update(PetitionRequest $request, Petition $petition)
     {
-        //
+        $petition->update($request->only([
+            'petition_number',
+            'registry_number',
+            'date_of_filing',
+            'document_type',
+            'document_owner',
+            'petition_type',
+            'petition_nature',
+            'errors_to_correct',
+            'priority',
+        ]));
+
+        if ($request->has('notice') && $petition->notice) {
+            $petition->notice->update($request->input('notice'));
+        }
+
+        if ($request->has('certificate') && $petition->certificate) {
+            $petition->certificate->update($request->input('certificate'));
+        }
+
+        if ($request->has('record_sheet') && $petition->recordSheet) {
+            $petition->recordSheet->update($request->input('record_sheet'));
+        }
+
+        if ($request->has('finality') && $petition->finality) {
+            $petition->finality->update($request->input('finality'));
+        }
+
+        return to_route('petitions.show', $petition);
     }
 
     /**

@@ -73,6 +73,10 @@ export interface PetitionForm {
     petition_nature: string;
     errors_to_correct: ErrorsToCorrect[];
     priority: string;
+    notice?: any;
+    certificate?: any;
+    record_sheet?: any;
+    finality?: any;
 }
 
 export interface Petition extends PetitionForm  {

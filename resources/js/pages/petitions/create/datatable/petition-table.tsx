@@ -152,10 +152,7 @@ const PetitionTable = () => {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild>
                                 <Link
-                                // href={route(
-                                //     'locational-clearance-applications.edit',
-                                //     info.row.original.id,
-                                // )}
+                                href={petitionsRoute.edit.url(info.row.original.id)}
                                 >
                                     <Edit2 className="size-4" /> Edit
                                 </Link>
