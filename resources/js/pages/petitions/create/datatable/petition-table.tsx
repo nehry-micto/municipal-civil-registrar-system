@@ -23,6 +23,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
     Table,
     TableBody,
@@ -32,6 +33,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import certificateGenerator from '@/routes/certificate-generator';
 import { default as petitionsRoute } from '@/routes/petitions';
 import { ErrorsToCorrect, Petition } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
@@ -44,27 +46,25 @@ import {
 import { debounce, pickBy } from 'lodash';
 import {
     ArrowRight,
+    CalendarIcon,
+    CheckCircle2Icon,
     Columns,
+    DownloadIcon,
     Edit2,
     EllipsisIcon,
     InfoIcon,
+    Lock,
     PlusCircleIcon,
     Search,
     TrashIcon,
-    DownloadIcon,
-    CheckCircle,
-    Lock,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { usePrevious } from 'react-use';
 import { toast } from 'sonner';
-import PostingNotice from '../posting-notice';
-import PostingCertificate from '../posting-certificate';
-import RecordSheet from '../record-sheet';
 import FinalityCertificate from '../finality-certificate';
-import { Spinner } from '@/components/ui/spinner';
-import { Skeleton } from '@/components/ui/skeleton';
-import certificateGenerator from '@/routes/certificate-generator';
+import PostingCertificate from '../posting-certificate';
+import PostingNotice from '../posting-notice';
+import RecordSheet from '../record-sheet';
 
 const tabs = [
     {
@@ -99,8 +99,10 @@ const PetitionTable = () => {
     const { petitions, filters, petitionSteps } = usePage<{
         petitions?: {
             data: Petition[];
-            links: { url: string | null; label: string; active: boolean }[];
-            last_page: number;
+            meta: {
+                links: { url: string | null; label: string; active: boolean }[];
+                last_page: number;
+            };
         };
         filters?: {
             tab?: string;
@@ -136,6 +138,8 @@ const PetitionTable = () => {
             {
                 id: 'actions',
                 header: '',
+                enableSorting: false,
+                enableHiding: false,
                 cell: (info) => (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -153,7 +157,7 @@ const PetitionTable = () => {
                                 //     info.row.original.id,
                                 // )}
                                 >
-                                    <Edit2 className="mr-2 size-4" /> Edit
+                                    <Edit2 className="size-4" /> Edit
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
@@ -172,17 +176,28 @@ const PetitionTable = () => {
                                     preserveScroll
                                     preserveState
                                 >
-                                    <TrashIcon className="mr-2 size-4 text-red-600" />{' '}
+                                    <TrashIcon className="size-4 text-red-600" />{' '}
                                     Delete
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuLabel>Workflow Steps</DropdownMenuLabel>
+                            <DropdownMenuLabel>
+                                Workflow Steps
+                            </DropdownMenuLabel>
                             {petitionSteps.map((step) => {
-                                const currentStepIndex = petitionSteps.findIndex(s => s.label === info.row.original.next_step);
+                                const currentStepLabel =
+                                    info.row.original.next_step;
+                                const currentStepIndex = currentStepLabel
+                                    ? petitionSteps.findIndex(
+                                          (s) => s.label === currentStepLabel,
+                                      )
+                                    : petitionSteps.length; // If next_step is null/undefined, assume finished (all steps completed)
+
                                 const stepIndex = step.value;
-                                const isCompleted = stepIndex < currentStepIndex;
-                                const isCurrent = stepIndex === currentStepIndex;
+                                const isCompleted =
+                                    stepIndex < currentStepIndex;
+                                const isCurrent =
+                                    stepIndex === currentStepIndex;
                                 const isFuture = stepIndex > currentStepIndex;
 
                                 return (
@@ -191,32 +206,71 @@ const PetitionTable = () => {
                                         disabled={isFuture}
                                         onClick={() => {
                                             if (isCurrent) {
-                                                setSelectedRecord(info.row.original);
+                                                setSelectedRecord(
+                                                    info.row.original,
+                                                );
                                             } else if (isCompleted) {
-                                                if (step.label === 'Notice of Posting') {
-                                                    // @ts-ignore
-                                                    window.open(certificateGenerator.notice.url(info.row.original.id), '_blank');
-                                                } else if (step.label === 'Certificate of Posting') {
-                                                    window.open(`/petitions/${info.row.original.id}/generate-certificate-of-posting`, '_blank');
+                                                if (
+                                                    step.label ===
+                                                    'Notice of Posting'
+                                                ) {
+                                                    window.open(
+                                                        certificateGenerator.notice.url(
+                                                            info.row.original
+                                                                .id,
+                                                        ),
+                                                        '_blank',
+                                                    );
+                                                } else if (
+                                                    step.label ===
+                                                    'Certificate of Posting'
+                                                ) {
+                                                    window.open(
+                                                        `/petitions/${info.row.original.id}/generate-certificate-of-posting`,
+                                                        '_blank',
+                                                    );
+                                                } else if (
+                                                    step.label ===
+                                                    'Record Sheet'
+                                                ) {
+                                                    window.open(
+                                                        `/petitions/${info.row.original.id}/generate-record-sheet`,
+                                                        '_blank',
+                                                    );
+                                                } else if (
+                                                    step.label ===
+                                                    'Certificate of Finality'
+                                                ) {
+                                                    window.open(
+                                                        `/petitions/${info.row.original.id}/generate-certificate-of-finality`,
+                                                        '_blank',
+                                                    );
                                                 }
                                             }
                                         }}
                                     >
                                         {isCompleted ? (
-                                            <CheckCircle className="mr-2 size-4 text-green-500" />
+                                            <CheckCircle2Icon className="size-4 text-green-500" />
                                         ) : isFuture ? (
-                                            <Lock className="mr-2 size-4 text-muted-foreground" />
+                                            <Lock className="size-4 text-muted-foreground" />
                                         ) : (
-                                            <ArrowRight className="mr-2 size-4" />
+                                            <ArrowRight className="size-4" />
                                         )}
-                                        
-                                        <span className={isCompleted ? 'text-green-600' : ''}>
+
+                                        <span
+                                            className={
+                                                isCompleted
+                                                    ? 'text-green-600'
+                                                    : ''
+                                            }
+                                        >
                                             {step.label}
                                         </span>
 
-                                        {isCompleted && (step.label === 'Notice of Posting' || step.label === 'Certificate of Posting') && (
-                                            <DownloadIcon className="ml-auto size-4" />
-                                        )}
+                                        {isCompleted &&
+                                            step.label !== 'Encoding' && (
+                                                <DownloadIcon className="ml-auto size-4" />
+                                            )}
                                     </DropdownMenuItem>
                                 );
                             })}
@@ -225,17 +279,49 @@ const PetitionTable = () => {
                 ),
             },
             {
+                accessorKey: 'date_of_filing',
+                header: 'Date of Filing',
+                cell: (info) => (
+                    <div className="flex items-center gap-1 text-xs">
+                        <CalendarIcon className="size-3" />
+                        {info.getValue().toString()}
+                    </div>
+                ),
+            },
+            {
                 accessorKey: 'petition_number',
                 header: 'Petition No.',
                 cell: (info) => (
-                    <Badge variant="secondary">
+                    <Badge variant="default">
                         {info.getValue().toString()}
                     </Badge>
                 ),
             },
-            { accessorKey: 'registry_number', header: 'Registry No.' },
-            { accessorKey: 'date_of_filing', header: 'Date of Filing' },
-            { accessorKey: 'document_owner', header: 'Document Owner' },
+            {
+                accessorKey: 'registry_number',
+                header: 'Registry No.',
+                cell: (info) => (
+                    <Badge variant="default">
+                        {info.getValue().toString()}
+                    </Badge>
+                ),
+            },
+
+            {
+                accessorKey: 'document_owner',
+                header: 'Document Owner',
+
+                cell: (info) => (
+                    <div className="flex items-center gap-2 font-bold uppercase">
+                        <div className="flex size-8 items-center justify-center rounded-full bg-primary text-center text-xs font-normal text-white">
+                            <span>
+                                {info.getValue().toString().slice(0, 2)}
+                            </span>
+                        </div>
+                        <span>{info.getValue().toString()}</span>
+                    </div>
+                ),
+            },
             { accessorKey: 'document_type', header: 'Document Type' },
             { accessorKey: 'petition_type', header: 'Petition Type' },
             { accessorKey: 'petition_nature', header: 'Petition Nature' },
@@ -344,7 +430,7 @@ const PetitionTable = () => {
             }, 300),
         [page.url],
     );
-    
+
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -357,7 +443,6 @@ const PetitionTable = () => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [values]);
-
 
     useEffect(() => {
         // const removeStartListener = router.on('start', () => {
@@ -497,6 +582,7 @@ const PetitionTable = () => {
                         });
                     }}
                     defaultValue="encoding"
+                    value={values.tab ?? 'encoding'}
                     className="mt-8 mb-4"
                 >
                     <TabsList className="">
@@ -531,30 +617,28 @@ const PetitionTable = () => {
                                 length: 2,
                             }).map((_, index) => (
                                 <TableRow key={index}>
-                                    {
-                                        columns.map((column, index) => (
-                                            <TableCell
+                                    {columns.map((column, index) => (
+                                        <TableCell
                                             key={index}
-                                            className="text-center m-2"
+                                            className="m-2 text-center"
                                         >
                                             <Skeleton className="h-4 w-full px-4" />
                                         </TableCell>
-                                    ))
-                                }
-                            </TableRow>) 
-                        )) : table.getRowModel().rows.length > 0 ? (
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : table.getRowModel().rows.length > 0 ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     className="cursor-pointer"
                                     key={row.id}
-                                    // onDoubleClick={() =>
-                                    //     router.visit(
-                                    //         route(
-                                    //             'locational-clearance-applications.edit',
-                                    //             row.original.id,
-                                    //         ),
-                                    //     )
-                                    // }
+                                    onDoubleClick={() =>
+                                        router.visit(
+                                            petitionsRoute.show.url(
+                                                row.original.id,
+                                            ),
+                                        )
+                                    }
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
@@ -584,8 +668,8 @@ const PetitionTable = () => {
                         )}
                     </TableBody>
                 </Table>
-                {(petitions?.last_page ?? 0) > 1 && (
-                    <UIPagination links={petitions?.links ?? []} />
+                {(petitions?.meta?.last_page ?? 0) > 1 && (
+                    <UIPagination links={petitions?.meta?.links ?? []} />
                 )}
             </div>
         </div>

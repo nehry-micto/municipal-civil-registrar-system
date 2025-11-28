@@ -110,19 +110,6 @@ const PostingCertificate = ({
                     </DialogClose>
                     <Button
                         disabled={processing}
-                        onClick={() =>
-                            window.open(
-                                `/petitions/${selectedRecord?.id}/generate-certificate-of-posting`,
-                                '_blank',
-                            )
-                        }
-                        variant="secondary"
-                        type="button"
-                    >
-                        Download
-                    </Button>
-                    <Button
-                        disabled={processing}
                         onClick={onSubmit}
                         type="submit"
                     >

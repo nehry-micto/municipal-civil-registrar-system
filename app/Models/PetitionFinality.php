@@ -16,6 +16,13 @@ class PetitionFinality extends Model
         'notes',
     ];
 
+    public function casts(): array
+    {
+        return [
+            'released_at' => 'datetime',
+        ];
+    }
+
     public function petition()
     {
         return $this->belongsTo(Petition::class);

@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
+import certificateGenerator from '@/routes/certificate-generator';
 import petitions from '@/routes/petitions';
 import { Petition } from '@/types';
 import { useForm } from '@inertiajs/react';
@@ -46,6 +47,12 @@ const RecordSheet = ({
             }),
             {
                 onSuccess: () => {
+                     window.open(
+                        certificateGenerator.recordSheet.url({
+                            petition: selectedRecord?.id ?? '',
+                        }),
+                        '_blank',
+                    );
                     setSelectedRecord(null);
                     reset();
                     toast.success('Record sheet details have been successfully saved.');

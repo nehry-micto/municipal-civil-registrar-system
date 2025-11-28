@@ -73,12 +73,13 @@ export interface PetitionForm {
     priority: string;
 }
 
-export interface Petition extends PetitionForm {
+export interface Petition extends PetitionForm  {
     id: string;
     next_step: string;
     next_step_id: string;
     created_at: string;
     updated_at: string;
+    client: Client;
 }
 interface Option {
     value: string;

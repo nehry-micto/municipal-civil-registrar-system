@@ -17,4 +17,13 @@ class PetitionRecordSheet extends Model
         'remarks',
         'decision',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'first_published_at' => 'date',
+            'second_published_at' => 'date',
+            'rendered_date' => 'date',
+        ];
+    }
 }

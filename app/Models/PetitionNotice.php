@@ -13,4 +13,17 @@ class PetitionNotice extends Model
         'petition_id',
         'notice_posting_date',
     ];
+
+    public function casts() : array {
+        return [
+            'notice_posting_date' => 'date',
+        ];
+    }
+    
+    public function petition()
+    {
+        return $this->belongsTo(Petition::class);
+    }
+
+
 }

@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
+import certificateGenerator from '@/routes/certificate-generator';
 import petitions from '@/routes/petitions';
 import { Petition } from '@/types';
 import { useForm } from '@inertiajs/react';
@@ -37,6 +38,15 @@ const FinalityCertificate = ({
             }),
             {
                 onSuccess: () => {
+                    if (selectedRecord?.id) {
+                        window.open(
+                            certificateGenerator.certificateOfFinality.url({
+                                petition: selectedRecord.id,
+                            }),
+                            '_blank',
+                        );
+                    }
+
                     setSelectedRecord(null);
                     reset();
                     toast.success('Certificate of Finality has been successfully issued.');

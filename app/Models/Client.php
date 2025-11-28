@@ -41,7 +41,6 @@ class Client extends Model
         return $this->hasMany(Petition::class);
     }
 
-
     protected function fullName(): Attribute
     {
         return Attribute::make(

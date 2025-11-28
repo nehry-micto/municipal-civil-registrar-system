@@ -38,6 +38,7 @@ class PetitionController extends Controller
                     [
                         'petition_number',
                         'registry_number',
+                        'document_owner'
                     ],
                     'ILIKE',
                     "%" . $search . "%"
@@ -66,11 +67,11 @@ class PetitionController extends Controller
             $query->where('current_step', $tab);
         }
 
-        $petitions = PetitionResource::collection(
+        $petitions =
             $query->orderBy($column, $sortDirection)
-                ->paginate($perPage)
-                ->withQueryString()
-        );
+            ->paginate($perPage)
+            ->withQueryString()
+            ->toResourceCollection();
 
 
         return Inertia::render('petitions/index', [
@@ -139,7 +140,10 @@ class PetitionController extends Controller
      */
     public function show(Petition $petition)
     {
-        //
+
+        return Inertia::render('petitions/show', [
+            'petition' => (new PetitionResource($petition->load('client')))->resolve(),
+        ]);
     }
 
     /**
