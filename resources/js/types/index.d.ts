@@ -51,6 +51,8 @@ export interface Client {
     suffix: string | null;
     contact_number: string | null;
     full_name: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface ErrorsToCorrect {

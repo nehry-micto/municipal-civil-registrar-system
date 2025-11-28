@@ -2,18 +2,64 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ClientResource;
 use App\Models\Client;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ClientController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'sortDirection' => 'string|in:asc,desc',
+            'column' => 'string|in:client_code,full_name,created_at',
+            'search' => 'string|max:255',
+            'perPage' => 'integer|between:1,100',
+            'trashedRecords' => 'in:1,2,3',
+        ]);
+
+        $sortDirection = $validated['sortDirection'] ?? 'desc';
+        $column = $validated['column'] ?? 'created_at';
+        $search = $validated['search'] ?? '';
+        $perPage = $validated['perPage'] ?? 10;
+        $trashedRecords = $validated['trashedRecords'] ?? 0;
+
+        $query = Client::withCount('petitions')
+            ->when($search, function ($query) use ($search) {
+                return $query->whereAny(
+                    [
+                        'first_name',
+                        'last_name',
+                        'client_code',
+                        'contact_number'
+                    ],
+                    'ILIKE',
+                    "%" . $search . "%"
+                );
+            })->when($trashedRecords, function ($query) use ($trashedRecords) {
+                if ($trashedRecords == 2) {
+                    return $query->onlyTrashed();
+                }
+
+                if ($trashedRecords == 3) {
+                    return $query->withTrashed();
+                }
+            });
+
+        $clients = $query->orderBy($column, $sortDirection)
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return Inertia::render('clients/index', [
+            'clients' => ClientResource::collection($clients),
+            'filters' => $validated
+        ]);
     }
 
     /**
@@ -21,7 +67,7 @@ class ClientController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('clients/create');
     }
 
     /**
@@ -29,7 +75,6 @@ class ClientController extends Controller
      */
     public function store(StoreClientRequest $request)
     {
-
         Client::create($request->only([
             'first_name',
             'last_name',
@@ -37,6 +82,8 @@ class ClientController extends Controller
             'suffix',
             'contact_number',
         ]));
+
+        return to_route('clients.index');
     }
 
     /**
@@ -44,7 +91,9 @@ class ClientController extends Controller
      */
     public function show(Client $client)
     {
-        //
+        return Inertia::render('clients/show', [
+            'client' => (new ClientResource($client->load('petitions')))->resolve(),
+        ]);
     }
 
     /**
@@ -52,7 +101,9 @@ class ClientController extends Controller
      */
     public function edit(Client $client)
     {
-        //
+        return Inertia::render('clients/edit', [
+            'client' => (new ClientResource($client))->resolve(),
+        ]);
     }
 
     /**
@@ -60,7 +111,15 @@ class ClientController extends Controller
      */
     public function update(UpdateClientRequest $request, Client $client)
     {
-        //
+        $client->update($request->only([
+            'first_name',
+            'last_name',
+            'middle_name',
+            'suffix',
+            'contact_number',
+        ]));
+
+        return to_route('clients.index');
     }
 
     /**
@@ -68,6 +127,8 @@ class ClientController extends Controller
      */
     public function destroy(Client $client)
     {
-        //
+        $client->delete();
+
+        return back();
     }
 }

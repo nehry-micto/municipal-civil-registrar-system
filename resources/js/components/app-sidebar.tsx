@@ -14,8 +14,9 @@ import { dashboard } from '@/routes';
 import petitions from '@/routes/petitions';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, FileText, Folder, Info, LayoutGrid } from 'lucide-react';
+import { BookOpen, FileText, Folder, Info, LayoutGrid, User } from 'lucide-react';
 import AppLogo from './app-logo';
+import clients from '@/routes/clients';
 
 const mainNavItems: NavItem[] = [
     {
@@ -28,6 +29,11 @@ const mainNavItems: NavItem[] = [
         href: petitions.index(),
         icon: FileText,
     },
+    {
+        title: 'Clients',
+        href: clients.index(),
+        icon: User,
+    }
 ];
 
 const footerNavItems: NavItem[] = [
