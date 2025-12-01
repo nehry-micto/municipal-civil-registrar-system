@@ -6,6 +6,7 @@ use App\Enums\DocumentType;
 use App\Enums\PetitionPriority;
 use App\Enums\PetitionType;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class PetitionRequest extends FormRequest
@@ -27,7 +28,12 @@ class PetitionRequest extends FormRequest
     {
         return [
             'client_id' => 'required|exists:clients,id',
-            'petition_number' => 'required|unique:petitions,petition_number',
+            'petition_number' => [
+                'required',
+                'max:20',
+                Rule::unique('petitions', 'petition_number')
+                    ->ignore($this->petition?->id),
+            ],
             'registry_number' => 'required',
             'date_of_filing' => 'required|date',
             'document_type' => ['required', new Enum(DocumentType::class)],

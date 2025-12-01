@@ -14,12 +14,14 @@ class PetitionCertificate extends Model
         'petition_id',
         'start_date',
         'end_date',
+        'posting_date',
     ];
 
     public function casts(): array {
         return [
             'start_date' => 'date',
-            'end_date' => 'date'
+            'end_date' => 'date',
+            'posting_date' => 'date',
         ];
     }
 

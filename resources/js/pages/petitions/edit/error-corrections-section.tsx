@@ -7,9 +7,16 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 import { PetitionForm } from '@/types';
-import { AlertCircle, Plus, X } from 'lucide-react';
+import { AlertCircle, Plus, Trash2 } from 'lucide-react';
 
 interface ErrorCorrectionsSectionProps {
     data: PetitionForm;
@@ -52,7 +59,7 @@ const ErrorCorrectionsSection = ({
     };
 
     return (
-        <Card className="h-full">
+        <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                     <AlertCircle className="size-4" /> Errors to Correct
@@ -61,29 +68,24 @@ const ErrorCorrectionsSection = ({
                     Specify the corrections needed
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-                <div className="space-y-4">
-                    {data.errors_to_correct.map((error, index) => (
-                        <div
-                            key={index}
-                            className="group relative rounded-lg border bg-card p-4"
-                        >
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="absolute right-2 top-2 h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
-                                onClick={() => removeErrorCorrection(index)}
-                            >
-                                <X className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                            </Button>
-
-                            <div className="grid gap-3">
-                                <div className="flex gap-2">
-                                    <div className="w-20">
-                                        <Label className="text-xs">
-                                            Item #
-                                        </Label>
+            <CardContent className="space-y-4">
+                <div className="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[80px]">
+                                    Item #
+                                </TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead>Current Value</TableHead>
+                                <TableHead>Corrected Value</TableHead>
+                                <TableHead className="w-[50px]"></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {data.errors_to_correct.map((error, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>
                                         <Input
                                             value={error.item_number}
                                             onChange={(e) =>
@@ -93,13 +95,10 @@ const ErrorCorrectionsSection = ({
                                                     e.target.value,
                                                 )
                                             }
-                                            className="h-8 text-sm"
+                                            className="h-8"
                                         />
-                                    </div>
-                                    <div className="flex-1">
-                                        <Label className="text-xs">
-                                            Description
-                                        </Label>
+                                    </TableCell>
+                                    <TableCell>
                                         <Input
                                             value={error.description}
                                             onChange={(e) =>
@@ -109,17 +108,11 @@ const ErrorCorrectionsSection = ({
                                                     e.target.value,
                                                 )
                                             }
-                                            className="h-8 text-sm"
-                                            placeholder="e.g. First Name"
+                                            className="h-8"
+                                            placeholder="Description"
                                         />
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                        <Label className="text-xs text-red-600 dark:text-red-400">
-                                            Incorrect
-                                        </Label>
+                                    </TableCell>
+                                    <TableCell>
                                         <Input
                                             value={error.current_value}
                                             onChange={(e) =>
@@ -129,13 +122,11 @@ const ErrorCorrectionsSection = ({
                                                     e.target.value,
                                                 )
                                             }
-                                            className="h-8 border-red-200 text-sm dark:border-red-900"
+                                            className="h-8 border-red-200 dark:border-red-900"
+                                            placeholder="Incorrect"
                                         />
-                                    </div>
-                                    <div>
-                                        <Label className="text-xs text-green-600 dark:text-green-400">
-                                            Correct
-                                        </Label>
+                                    </TableCell>
+                                    <TableCell>
                                         <Input
                                             value={error.corrected_value}
                                             onChange={(e) =>
@@ -145,13 +136,27 @@ const ErrorCorrectionsSection = ({
                                                     e.target.value,
                                                 )
                                             }
-                                            className="h-8 border-green-200 text-sm dark:border-green-900"
+                                            className="h-8 border-green-200 dark:border-green-900"
+                                            placeholder="Correct"
                                         />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                            onClick={() =>
+                                                removeErrorCorrection(index)
+                                            }
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 </div>
 
                 <Button

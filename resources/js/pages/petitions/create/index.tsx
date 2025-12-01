@@ -11,11 +11,11 @@ import {
 } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { FileText } from 'lucide-react';
-import ClientSelectionStep from './create/client-selection-step';
-import DocumentDetailsStep from './create/document-details-step';
-import ErrorCorrectionsStep from './create/error-correction-step';
-import PetitionSummary from './create/petition-summary';
-import ProgressStepper from './create/progress-stepper';
+import ClientSelectionStep from './client-selection-step';
+import DocumentDetailsStep from './document-details-step';
+import ErrorCorrectionsStep from './error-correction-step';
+import PetitionSummary from './petition-summary';
+import ProgressStepper from './progress-stepper';
 
 const Create = () => {
     const { props } = usePage();

@@ -184,7 +184,15 @@ const ClientSelectionStep = ({
                     </div>
                 )}
 
-                <div className="flex justify-end border-t pt-4">
+                <div className="flex items-center justify-between border-t pt-4">
+                    <Button
+                        type="button"
+                        onClick={() => window.history.back()}
+                        variant="outline"
+                    >
+                        <X className="mr-2 size-4" />
+                        Cancel
+                    </Button>
                     <Button
                         type="button"
                         onClick={onNext}

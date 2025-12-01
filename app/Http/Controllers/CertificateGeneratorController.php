@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Configuration;
 use App\Models\Petition;
 use Illuminate\Http\Request;
 use PhpOffice\PhpWord\TemplateProcessor;
@@ -11,6 +12,11 @@ class CertificateGeneratorController extends Controller
 {
     public function generateNoticeOfPosting(Petition $petition)
     {
+
+        if (!$petition->notice) {
+            return response('Notice of Posting data is required before generating Notice of Posting.', 400);
+        }
+
         $templateProcessor = new TemplateProcessor(
             storage_path('app/templates/POSTING_NOTICE.docx')
         );
@@ -20,12 +26,24 @@ class CertificateGeneratorController extends Controller
             2 => 'Death Certificate',
             default => 'Document',
         };
+        
+        
+
+        // get latest configuration
+        $configuration = Configuration::getLatest();
 
         $templateProcessor->setValue('petitioner', $petition->client->full_name);
         $templateProcessor->setValue('nature_of_petition', $petition->petition_nature);
         $templateProcessor->setValue('document_type', $documentType);
         $templateProcessor->setValue('document_owner', $petition->document_owner);
         $templateProcessor->setValue('date', $petition->notice->notice_posting_date->format('d F Y'));
+
+        // from config
+        $templateProcessor->setValue('civil_registry_head', $configuration->data['civil_registry_head']['name']);
+        $templateProcessor->setValue('position', $configuration->data['civil_registry_head']['position']);
+
+        $templateProcessor->setValue('municipality',strtoupper($configuration->data['municipality']));
+        $templateProcessor->setValue('province',strtoupper($configuration->data['province']));
 
         $tempFile = tempnam(sys_get_temp_dir(), 'phpWord');
 
@@ -68,7 +86,22 @@ class CertificateGeneratorController extends Controller
         $templateProcessor->setValue('registry_no', $petition->registry_number);
         $templateProcessor->setValue('start_date', $petition->certificate->start_date->format('d F Y'));
         $templateProcessor->setValue('end_date', $petition->certificate->end_date->format('d F Y'));
-       
+
+        // from config
+        $configuration = Configuration::getLatest();
+        
+        $templateProcessor->setValue('civil_registry_head', $configuration->data['civil_registry_head']['name']);
+        $templateProcessor->setValue('position', $configuration->data['civil_registry_head']['position']);
+
+        $templateProcessor->setValue('municipality',strtoupper($configuration->data['municipality']));
+        $templateProcessor->setValue('province',strtoupper($configuration->data['province']));
+
+        $postingDate = $petition->certificate->posting_date;
+        $day = $postingDate?->format('jS') ?? '';
+        $month = $postingDate?->format('F Y') ?? '';
+
+        $templateProcessor->setValue('day', $day);
+        $templateProcessor->setValue('month', $month);
 
         $tempFile = tempnam(sys_get_temp_dir(), 'phpWord');
 
@@ -125,6 +158,16 @@ class CertificateGeneratorController extends Controller
         $templateProcessor->setValue('owner', $petition->document_owner);
         $templateProcessor->setValue('document_type', $documentType);
         $templateProcessor->setValue('registry_no', $petition->registry_number);
+
+                // from config
+        $configuration = Configuration::getLatest();
+        
+        $templateProcessor->setValue('civil_registry_head', $configuration->data['civil_registry_head']['name']);
+        $templateProcessor->setValue('position', $configuration->data['civil_registry_head']['position']);
+
+        $templateProcessor->setValue('municipality',strtoupper($configuration->data['municipality']));
+        $templateProcessor->setValue('province',strtoupper($configuration->data['province']));
+
 
         // Handle errors_to_correct table
         $errorsToCorrect = $petition->errors_to_correct ?? [];
@@ -186,6 +229,17 @@ class CertificateGeneratorController extends Controller
         $templateProcessor->setValue('petition_nature', $petition->petition_nature);
         $templateProcessor->setValue('decision_date', $petition->recordSheet->rendered_date ? 
             \Carbon\Carbon::parse($petition->recordSheet->rendered_date)->format('d F Y') : '');
+
+                // from config
+        $configuration = Configuration::getLatest();
+        
+        $templateProcessor->setValue('civil_registry_head', $configuration->data['civil_registry_head']['name']);
+        $templateProcessor->setValue('position', $configuration->data['civil_registry_head']['position']);
+
+        $templateProcessor->setValue('municipality',strtoupper($configuration->data['municipality']));
+        $templateProcessor->setValue('province',strtoupper($configuration->data['province']));
+
+
         $dateReleased = $petition->finality->released_at;
         $day = $dateReleased->format('jS');
         $month = $dateReleased->format('F Y');

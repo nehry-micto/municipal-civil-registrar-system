@@ -27,8 +27,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/create', 'create')->name('create');
         Route::post('/store', 'store')->name('store');
         Route::get('/{petition}', 'show')->name('show');
-        Route::get('/{petition}/edit', 'edit')->name('edit');
-        Route::put('/{petition}', 'update')->name('update');
+        Route::get('/{petition}/edit', [PetitionController::class, 'edit'])->name('edit');
+        Route::put('/{petition}', [PetitionController::class, 'update'])->name('update');
+        Route::put('/{petition}/update-step', [PetitionController::class, 'updateStep'])->name('update-step');
         Route::delete('/{petition}', 'destroy')->name('destroy');
         Route::post('/{petition}', 'changeStep')->name('changeStep');
     });

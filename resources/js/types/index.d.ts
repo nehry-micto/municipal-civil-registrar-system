@@ -62,6 +62,30 @@ export interface ErrorsToCorrect {
     corrected_value: string;
 }
 
+export interface NoticeData {
+    notice_posting_date?: string;
+}
+
+export interface CertificateData {
+    start_date?: string;
+    end_date?: string;
+    posting_date?: string;
+}
+
+export interface RecordSheetData {
+    first_published_at?: string;
+    second_published_at?: string;
+    rendered_date?: string;
+    decision?: number | string;
+    remarks?: string;
+}
+
+export interface FinalityData {
+    certificate_number?: string;
+    released_at?: string;
+    notes?: string;
+}
+
 export interface PetitionForm {
     client_id: string;
     petition_number: string;
@@ -73,16 +97,17 @@ export interface PetitionForm {
     petition_nature: string;
     errors_to_correct: ErrorsToCorrect[];
     priority: string;
-    notice?: any;
-    certificate?: any;
-    record_sheet?: any;
-    finality?: any;
+    notice?: NoticeData | null;
+    certificate?: CertificateData | null;
+    record_sheet?: RecordSheetData | null;
+    finality?: FinalityData | null;
 }
 
 export interface Petition extends PetitionForm  {
     id: string;
     next_step: string;
     next_step_id: string;
+    current_step: number;
     created_at: string;
     updated_at: string;
     client: Client;
@@ -97,3 +122,25 @@ export type DocumentType = Option;
 export type Priority = Option;
 
 export type PetitionType = Option;
+
+export interface ConfigurationData {
+    civil_registry_head: {
+        name: string;
+        position: string;
+    };
+    mayor: {
+        name: string;
+        position: string;
+    };
+    municipality: string;
+    province: string;
+}
+
+export interface Configuration {
+    id: number;
+    version: number;
+    data: ConfigurationData;
+    created_at: string;
+    updated_at: string;
+}
+

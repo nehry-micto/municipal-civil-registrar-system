@@ -28,6 +28,7 @@ const PostingCertificate = ({
     const { data, post, errors, setData, processing, reset } = useForm({
         start_date: new Date().toISOString().split('T')[0],
         end_date: '',
+        posting_date: '',
     });
 
     useEffect(() => {
@@ -96,6 +97,19 @@ const PostingCertificate = ({
                             type="date"
                         />
                         <InputError message={errors.end_date} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="posting_date">Posting Date</Label>
+                        <Input
+                            name="posting_date"
+                            value={data.posting_date}
+                            className="block w-full"
+                            id="posting_date"
+                            aria-invalid={errors.posting_date ? true : false}
+                            onChange={(e) => setData('posting_date', e.target.value)}
+                            type="date"
+                        />
+                        <InputError message={errors.posting_date} />
                     </div>
                 </div>
                 <DialogFooter>

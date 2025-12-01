@@ -49,11 +49,24 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'petitionSteps' => collect(PetitionStep::cases())->map(fn ($step) => [
+            'petitionSteps' => collect(PetitionStep::cases())->map(fn($step) => [
                 'value' => $step->value,
                 'label' => $step->label(),
                 'description' => $step->description(),
             ]),
+            'petitionTypes' => collect(PetitionType::cases())->map(fn($type) => [
+                'value' => $type->value,
+                'label' => $type->label(),
+            ]),
+            'documentTypes' => collect(DocumentType::cases())->map(fn($type) => [
+                'value' => $type->value,
+                'label' => $type->label(),
+            ]),
+            'priorities' => collect(\App\Enums\PetitionPriority::cases())->map(fn($priority) => [
+                'value' => $priority->value,
+                'label' => $priority->label(),
+            ]),
+
         ];
     }
 }

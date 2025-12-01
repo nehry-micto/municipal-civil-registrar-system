@@ -152,7 +152,9 @@ const PetitionTable = () => {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild>
                                 <Link
-                                href={petitionsRoute.edit.url(info.row.original.id)}
+                                    href={petitionsRoute.edit.url(
+                                        info.row.original.id,
+                                    )}
                                 >
                                     <Edit2 className="size-4" /> Edit
                                 </Link>
@@ -410,6 +412,7 @@ const PetitionTable = () => {
                 cell: (info) => info.getValue(),
             },
         ],
+        //ignore
         [],
     );
 
@@ -578,8 +581,7 @@ const PetitionTable = () => {
                             tab: value,
                         });
                     }}
-                    defaultValue="encoding"
-                    value={values.tab ?? 'encoding'}
+                    value={values.tab || 'encoding'}
                     className="mt-8 mb-4"
                 >
                     <TabsList className="">

@@ -86,7 +86,6 @@ class PetitionController extends Controller
     public function create(Request $request)
     {
 
-
         $clients  =  Client::when($request->search, function ($query) use ($request) {
             return $query->whereAny(
                 [
@@ -227,6 +226,7 @@ class PetitionController extends Controller
             $request->validate([
                 'start_date' => 'required|date|after:notice_posting_date',
                 'end_date' => 'required|date|after:start_date',
+                'posting_date' => 'nullable|date',
             ]);
 
             // check if start date is greater than the notice posting date
@@ -243,6 +243,7 @@ class PetitionController extends Controller
             $petition->certificate()->create([
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
+                'posting_date' => $request->posting_date,
             ]);
         }
 
@@ -285,5 +286,72 @@ class PetitionController extends Controller
                 'notes' => $request->notes,
             ]);
         }
+    }
+
+    public function updateStep(Request $request, Petition $petition)
+    {
+        $step = $request->input('step');
+
+        if ($step === 'notice') {
+            $request->validate([
+                'notice_posting_date' => 'required|date',
+            ]);
+
+            $petition->notice()->updateOrCreate(
+                ['petition_id' => $petition->id],
+                ['notice_posting_date' => $request->notice_posting_date]
+            );
+        } elseif ($step === 'certificate') {
+            $request->validate([
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after:start_date',
+                'posting_date' => 'nullable|date',
+            ]);
+
+            $petition->certificate()->updateOrCreate(
+                ['petition_id' => $petition->id],
+                [
+                    'start_date' => $request->start_date,
+                    'end_date' => $request->end_date,
+                    'posting_date' => $request->posting_date,
+                ]
+            );
+        } elseif ($step === 'record_sheet') {
+            $request->validate([
+                'first_published_at' => 'required|date',
+                'second_published_at' => 'nullable|date',
+                'rendered_date' => 'required|date',
+                'remarks' => 'nullable|string',
+                'decision' => 'required|in:1,0',
+            ]);
+
+            $petition->recordSheet()->updateOrCreate(
+                ['petition_id' => $petition->id],
+                [
+                    'first_published_at' => $request->first_published_at,
+                    'second_published_at' => $request->second_published_at,
+                    'rendered_date' => $request->rendered_date,
+                    'remarks' => $request->remarks,
+                    'decision' => $request->decision,
+                ]
+            );
+        } elseif ($step === 'finality') {
+            $request->validate([
+                'certificate_number' => 'required',
+                'released_at' => 'nullable|date',
+                'notes' => 'nullable|string',
+            ]);
+
+            $petition->finality()->updateOrCreate(
+                ['petition_id' => $petition->id],
+                [
+                    'certificate_number' => $request->certificate_number,
+                    'released_at' => $request->released_at,
+                    'notes' => $request->notes,
+                ]
+            );
+        }
+
+        return back();
     }
 }
