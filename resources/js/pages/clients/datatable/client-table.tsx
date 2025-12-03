@@ -45,9 +45,10 @@ import {
     Edit2,
     EllipsisIcon,
     Eye,
+    LucideUndo2,
     PlusCircleIcon,
     Search,
-    TrashIcon,
+    Trash2Icon,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { usePrevious } from 'react-use';
@@ -91,6 +92,8 @@ const ClientTable = () => {
         return saved ? JSON.parse(saved) : {};
     });
 
+    console.log(clientsData);
+
     const columns = useMemo<ColumnDef<Client, object>[]>(
         () => [
             {
@@ -126,26 +129,71 @@ const ClientTable = () => {
                                     <Edit2 className="size-4" /> Edit
                                 </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link
-                                    className="w-full"
-                                    method="delete"
-                                    as="button"
-                                    href={clients.destroy.url(
-                                        info.row.original.id,
-                                    )}
-                                    onSuccess={() =>
-                                        toast.success(
-                                            'Client deleted successfully!',
-                                        )
-                                    }
-                                    preserveScroll
-                                    preserveState
-                                >
-                                    <TrashIcon className="size-4 text-red-600" />{' '}
-                                    Delete
-                                </Link>
-                            </DropdownMenuItem>
+                            {info.row.original.deleted_at ? (
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        className="w-full"
+                                        method="delete"
+                                        as="button"
+                                        href={clients.destroy.url(
+                                            info.row.original.id,
+                                        )}
+                                        onSuccess={() =>
+                                            toast.success(
+                                                'Client permanently deleted successfully!',
+                                            )
+                                        }
+                                        preserveScroll
+                                        preserveState
+                                    >
+                                        <Trash2Icon className="size-4 text-red-600" />{' '}
+                                        Permanent Delete
+                                    </Link>
+                                </DropdownMenuItem>
+                            ) : (
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        className="w-full"
+                                        method="delete"
+                                        as="button"
+                                        href={clients.delete.url(
+                                            info.row.original.id,
+                                        )}
+                                        onSuccess={() =>
+                                            toast.success(
+                                                'Client deleted successfully!',
+                                            )
+                                        }
+                                        preserveScroll
+                                        preserveState
+                                    >
+                                        <Trash2Icon className="size-4 text-red-600" />{' '}
+                                        To Trash
+                                    </Link>
+                                </DropdownMenuItem>
+                            )}
+                            {info.row.original.deleted_at && (
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        className="w-full"
+                                        method="post"
+                                        as="button"
+                                        href={clients.restore.url(
+                                            info.row.original.id,
+                                        )}
+                                        onSuccess={() =>
+                                            toast.success(
+                                                'Client restored successfully!',
+                                            )
+                                        }
+                                        preserveScroll
+                                        preserveState
+                                    >
+                                        <LucideUndo2 className="size-4" />{' '}
+                                        Restore
+                                    </Link>
+                                </DropdownMenuItem>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 ),

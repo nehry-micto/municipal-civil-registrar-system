@@ -133,7 +133,21 @@ class ClientController extends Controller
      */
     public function destroy(Client $client)
     {
+        $client->forceDelete();
+
+        return back();
+    }
+
+    public function delete(Client $client)
+    {
         $client->delete();
+
+        return back();
+    }
+
+    public function restore(Client $client)
+    {
+        $client->restore();
 
         return back();
     }

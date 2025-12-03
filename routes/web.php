@@ -27,7 +27,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{petition}/edit', [PetitionController::class, 'edit'])->name('edit');
         Route::put('/{petition}', [PetitionController::class, 'update'])->name('update');
         Route::put('/{petition}/update-step', [PetitionController::class, 'updateStep'])->name('update-step');
-        Route::delete('/{petition}', 'destroy')->name('destroy');
+        Route::delete('/{petition}', 'destroy')->name('destroy')
+            ->withTrashed();
+        Route::delete('/{petition}/delete', 'delete')->name('delete');
+        Route::post('/{petition}/restore', 'restore')
+            ->withTrashed()
+            ->name('restore');
         Route::post('/{petition}', 'changeStep')->name('changeStep');
     });
 
@@ -44,7 +49,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/{client}', 'show')->name('show');
             Route::get('/{client}/edit', 'edit')->name('edit');
             Route::put('/{client}', 'update')->name('update');
-            Route::delete('/{client}', 'destroy')->name('destroy');
+            Route::delete('/{client}', 'destroy')->name('destroy')
+                ->withTrashed();
+            Route::delete('/{client}/delete', 'delete')->name('delete');
+            Route::post('/{client}/restore', 'restore')->name('restore')
+                ->withTrashed();
         }
     );
 

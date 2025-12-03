@@ -33,7 +33,12 @@ class PetitionController extends Controller
         $perPage = $validated['perPage'] ?? 10;
         $trashedRecords = $validated['trashedRecords'] ?? 0;
 
-        $query = Petition::with('client')
+        $query = Petition::whereHas(
+            'client',
+            function ($query) {
+                $query->whereNull('deleted_at');
+            }
+        )
             ->when($search, function ($query) use ($search) {
                 return $query->whereAny(
                     [
@@ -192,12 +197,30 @@ class PetitionController extends Controller
         return to_route('petitions.show', $petition);
     }
 
+    public function delete(Petition $petition)
+    {
+        $petition->delete();
+
+        return back();
+    }
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Petition $petition)
     {
-        //
+        $petition->forceDelete();
+
+        return back();
+    }
+
+
+    // restore
+    public function restore(Petition $petition)
+    {
+        $petition->restore();
+
+        return back();
     }
 
     public function changeStep(Request $request, Petition $petition)

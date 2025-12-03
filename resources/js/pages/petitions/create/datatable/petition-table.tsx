@@ -56,9 +56,10 @@ import {
     Edit2,
     EllipsisIcon,
     Lock,
+    LucideUndo2,
     PlusCircleIcon,
     Search,
-    TrashIcon,
+    Trash2,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { usePrevious } from 'react-use';
@@ -166,26 +167,71 @@ const PetitionTable = () => {
                                     <Edit2 className="size-4" /> Edit
                                 </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link
-                                    className="w-full"
-                                    method="delete"
-                                    as="button"
-                                    href={petitionsRoute.destroy.url(
-                                        info.row.original.id,
-                                    )}
-                                    onSuccess={() =>
-                                        toast.success(
-                                            'Record deleted successfully!',
-                                        )
-                                    }
-                                    preserveScroll
-                                    preserveState
-                                >
-                                    <TrashIcon className="size-4 text-red-600" />{' '}
-                                    Delete
-                                </Link>
-                            </DropdownMenuItem>
+                            {info.row.original.deleted_at ? (
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        className="w-full"
+                                        method="delete"
+                                        as="button"
+                                        href={petitionsRoute.destroy.url(
+                                            info.row.original.id,
+                                        )}
+                                        onSuccess={() =>
+                                            toast.success(
+                                                'Record deleted successfully!',
+                                            )
+                                        }
+                                        preserveScroll
+                                        preserveState
+                                    >
+                                        <Trash2 className="size-4 text-red-600" />{' '}
+                                        Delete
+                                    </Link>
+                                </DropdownMenuItem>
+                            ) : (
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        className="w-full"
+                                        method="delete"
+                                        as="button"
+                                        href={petitionsRoute.delete.url(
+                                            info.row.original.id,
+                                        )}
+                                        onSuccess={() =>
+                                            toast.success(
+                                                'Record moved to trash successfully!',
+                                            )
+                                        }
+                                        preserveScroll
+                                        preserveState
+                                    >
+                                        <Trash2 className="size-4 text-red-600" />{' '}
+                                        To Trash
+                                    </Link>
+                                </DropdownMenuItem>
+                            )}
+                            {info.row.original.deleted_at && (
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        className="w-full"
+                                        method="post"
+                                        as="button"
+                                        href={petitionsRoute.restore.url(
+                                            info.row.original.id,
+                                        )}
+                                        onSuccess={() =>
+                                            toast.success(
+                                                'Record restored successfully!',
+                                            )
+                                        }
+                                        preserveScroll
+                                        preserveState
+                                    >
+                                        <LucideUndo2 className="size-4" />{' '}
+                                        Restore
+                                    </Link>
+                                </DropdownMenuItem>
+                            )}
                             <DropdownMenuSeparator />
                             <DropdownMenuLabel>
                                 Workflow Steps

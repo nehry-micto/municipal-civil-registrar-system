@@ -53,6 +53,7 @@ export interface Client {
     full_name: string;
     created_at: string;
     updated_at: string;
+    deleted_at?: string | null;
 }
 
 export interface ErrorsToCorrect {
@@ -103,7 +104,7 @@ export interface PetitionForm {
     finality?: FinalityData | null;
 }
 
-export interface Petition extends PetitionForm  {
+export interface Petition extends PetitionForm {
     id: string;
     next_step: string;
     next_step_id: string;
@@ -111,6 +112,7 @@ export interface Petition extends PetitionForm  {
     created_at: string;
     updated_at: string;
     client: Client;
+    deleted_at?: string | null;
 }
 interface Option {
     value: string;
@@ -143,4 +145,3 @@ export interface Configuration {
     created_at: string;
     updated_at: string;
 }
-

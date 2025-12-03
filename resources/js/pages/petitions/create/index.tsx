@@ -22,11 +22,6 @@ const Create = () => {
 
     const clients = props.clients as Client[];
 
-    const documentTypes: DocumentType[] = [
-        { value: '0', label: 'Birth Certificate' },
-        { value: '1', label: 'Death Certificate' },
-    ];
-
     const priorities: Priority[] = [
         { value: '0', label: 'Normal' },
         { value: '1', label: 'Urgent' },
@@ -48,11 +43,6 @@ const Create = () => {
             title: 'Corrections',
             description: 'Specify what needs to be corrected',
         },
-    ];
-
-    const petitionTypes: PetitionType[] = [
-        { value: '0', label: 'Correction of Clerical Error' },
-        { value: '1', label: 'Other' },
     ];
 
     // Custom hooks
@@ -113,8 +103,8 @@ const Create = () => {
                     <DocumentDetailsStep
                         formData={formData}
                         setData={setData}
-                        documentTypes={documentTypes}
-                        petitionTypes={petitionTypes}
+                        documentTypes={props.documentTypes as DocumentType[]}
+                        petitionTypes={props.petitionTypes as PetitionType[]}
                         errors={errors}
                         priorities={priorities}
                         selectedClient={selectedClient}
