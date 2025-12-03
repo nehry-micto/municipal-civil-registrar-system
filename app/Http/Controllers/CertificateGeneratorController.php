@@ -189,7 +189,7 @@ class CertificateGeneratorController extends Controller
     public function generateCertificateOfFinality(Petition $petition)
     {
         $templateProcessor = new TemplateProcessor(
-            storage_path('app/templates/Finality.docx')
+            storage_path('app/templates/FINALITY.docx')
         );
 
         // Check if record sheet relationship exists (decision date data)
