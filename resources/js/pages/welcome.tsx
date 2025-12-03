@@ -8,7 +8,7 @@ export default function Welcome() {
         <AuthSimpleLayout>
             <Head title="Welcome" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="prose max-w-none space-y-2 text-center">
+                <div className="prose max-w-none space-y-2 text-justify">
                     <h4>Welcome to the Civil Registrar System</h4>
                     <p>
                         This system is designed to streamline the management of
@@ -16,7 +16,7 @@ export default function Welcome() {
                         and death records. Navigate through the dashboard to
                         access various features and functionalities.
                     </p>
-                    <Button asChild>
+                    <Button className="mt-4 w-full" asChild>
                         <Link href={login.url()}>Login</Link>
                     </Button>
                 </div>

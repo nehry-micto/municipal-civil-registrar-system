@@ -22,8 +22,8 @@ class CertificateGeneratorController extends Controller
         );
 
         $documentType = $petition->document_type->name();
-        
-        
+
+
 
         // get latest configuration
         $configuration = Configuration::getLatest();
@@ -38,8 +38,8 @@ class CertificateGeneratorController extends Controller
         $templateProcessor->setValue('civil_registry_head', $configuration->data['civil_registry_head']['name']);
         $templateProcessor->setValue('position', $configuration->data['civil_registry_head']['position']);
 
-        $templateProcessor->setValue('municipality',strtoupper($configuration->data['municipality']));
-        $templateProcessor->setValue('province',strtoupper($configuration->data['province']));
+        $templateProcessor->setValue('municipality', strtoupper($configuration->data['municipality']));
+        $templateProcessor->setValue('province', strtoupper($configuration->data['province']));
 
         $tempFile = tempnam(sys_get_temp_dir(), 'phpWord');
 
@@ -52,7 +52,7 @@ class CertificateGeneratorController extends Controller
             unlink($tempFile); // remove temp file
         }, 200, [
             "Content-Type" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "Content-Disposition" => "attachment; filename=\"Notice_of_Posting_{$petition->petition_number}.docx\"",
+            "Content-Disposition" => "attachment; filename=\"Notice_of_Posting_{$petition->petition_number}_{$petition->document_owner}.docx\"",
             "Content-Length" => filesize($tempFile),
         ]);
     }
@@ -74,19 +74,19 @@ class CertificateGeneratorController extends Controller
         $templateProcessor->setValue('petitioner', $petition->client->full_name);
         $templateProcessor->setValue('nature_of_petition', $petition->petition_nature);
         $templateProcessor->setValue('document_type', $documentType);
-        $templateProcessor->setValue('document_owner', $petition->document_owner); 
+        $templateProcessor->setValue('document_owner', $petition->document_owner);
         $templateProcessor->setValue('registry_no', $petition->registry_number);
         $templateProcessor->setValue('start_date', $petition->certificate->start_date->format('d F Y'));
         $templateProcessor->setValue('end_date', $petition->certificate->end_date->format('d F Y'));
 
         // from config
         $configuration = Configuration::getLatest();
-        
+
         $templateProcessor->setValue('civil_registry_head', $configuration->data['civil_registry_head']['name']);
         $templateProcessor->setValue('position', $configuration->data['civil_registry_head']['position']);
 
-        $templateProcessor->setValue('municipality',strtoupper($configuration->data['municipality']));
-        $templateProcessor->setValue('province',strtoupper($configuration->data['province']));
+        $templateProcessor->setValue('municipality', strtoupper($configuration->data['municipality']));
+        $templateProcessor->setValue('province', strtoupper($configuration->data['province']));
 
         $postingDate = $petition->certificate->posting_date;
         $day = $postingDate?->format('jS') ?? '';
@@ -106,7 +106,7 @@ class CertificateGeneratorController extends Controller
             unlink($tempFile); // remove temp file
         }, 200, [
             "Content-Type" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "Content-Disposition" => "attachment; filename=\"Certificate_of_Posting_{$petition->petition_number}.docx\"",
+            "Content-Disposition" => "attachment; filename=\"Certificate_of_Posting_{$petition->petition_number}_{$petition->document_owner}.docx\"",
             "Content-Length" => filesize($tempFile),
         ]);
     }
@@ -143,23 +143,23 @@ class CertificateGeneratorController extends Controller
         $templateProcessor->setValue('document_type', $documentType);
         $templateProcessor->setValue('registry_no', $petition->registry_number);
 
-                // from config
+        // from config
         $configuration = Configuration::getLatest();
-        
+
         $templateProcessor->setValue('civil_registry_head', $configuration->data['civil_registry_head']['name']);
         $templateProcessor->setValue('position', $configuration->data['civil_registry_head']['position']);
 
-        $templateProcessor->setValue('municipality',strtoupper($configuration->data['municipality']));
-        $templateProcessor->setValue('province',strtoupper($configuration->data['province']));
+        $templateProcessor->setValue('municipality', strtoupper($configuration->data['municipality']));
+        $templateProcessor->setValue('province', strtoupper($configuration->data['province']));
 
 
         // Handle errors_to_correct table
         $errorsToCorrect = $petition->errors_to_correct ?? [];
-        
+
         if (!empty($errorsToCorrect)) {
             // Clone the table row for each error entry
             $templateProcessor->cloneRow('item_no', count($errorsToCorrect));
-            
+
             // Populate each row with error data
             foreach ($errorsToCorrect as $index => $error) {
                 $rowNumber = $index + 1;
@@ -181,7 +181,7 @@ class CertificateGeneratorController extends Controller
             unlink($tempFile); // remove temp file
         }, 200, [
             "Content-Type" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "Content-Disposition" => "attachment; filename=\"Record_Sheet_{$petition->petition_number}.doc\"",
+            "Content-Disposition" => "attachment; filename=\"Record_Sheet_{$petition->petition_number}_{$petition->document_owner}.doc\"",
             "Content-Length" => filesize($tempFile),
         ]);
     }
@@ -207,17 +207,17 @@ class CertificateGeneratorController extends Controller
         $templateProcessor->setValue('document_type', $documentType);
         $templateProcessor->setValue('document_owner', $petition->document_owner);
         $templateProcessor->setValue('petition_nature', $petition->petition_nature);
-        $templateProcessor->setValue('decision_date', $petition->recordSheet->rendered_date ? 
+        $templateProcessor->setValue('decision_date', $petition->recordSheet->rendered_date ?
             \Carbon\Carbon::parse($petition->recordSheet->rendered_date)->format('d F Y') : '');
 
-                // from config
+        // from config
         $configuration = Configuration::getLatest();
-        
+
         $templateProcessor->setValue('civil_registry_head', $configuration->data['civil_registry_head']['name']);
         $templateProcessor->setValue('position', $configuration->data['civil_registry_head']['position']);
 
-        $templateProcessor->setValue('municipality',strtoupper($configuration->data['municipality']));
-        $templateProcessor->setValue('province',strtoupper($configuration->data['province']));
+        $templateProcessor->setValue('municipality', strtoupper($configuration->data['municipality']));
+        $templateProcessor->setValue('province', strtoupper($configuration->data['province']));
 
 
         $dateReleased = $petition->finality->released_at;
@@ -238,12 +238,13 @@ class CertificateGeneratorController extends Controller
             unlink($tempFile); // remove temp file
         }, 200, [
             "Content-Type" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "Content-Disposition" => "attachment; filename=\"Certificate_of_Finality_{$petition->petition_number}.docx\"",
+            "Content-Disposition" => "attachment; filename=\"Certificate_of_Finality_{$petition->petition_number}_{$petition->document_owner}.docx\"",
             "Content-Length" => filesize($tempFile),
         ]);
     }
 
-    private function formatPublicationDate($startDate, $endDate) {
+    private function formatPublicationDate($startDate, $endDate)
+    {
         // no end date
         if (!$endDate) {
             return $startDate->format('F d, Y');
@@ -251,8 +252,8 @@ class CertificateGeneratorController extends Controller
 
         // same month and year
         if ($startDate->format('F Y') == $endDate->format('F Y')) {
-           // format Month d - d, Y
-           return $startDate->format('F d') . ' - ' . $endDate->format('d, Y');
+            // format Month d - d, Y
+            return $startDate->format('F d') . ' - ' . $endDate->format('d, Y');
         }
         // different month but same year
         if ($startDate->format('Y') == $endDate->format('Y')) {

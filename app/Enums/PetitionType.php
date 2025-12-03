@@ -19,4 +19,11 @@ enum PetitionType: int
             self::CORRECTION => 'Petition for correction of clerical error in civil registry documents',
         };
     }
+
+    public function name(): string
+    {
+        return match ($this) {
+            self::CORRECTION => 'Correction',
+        };
+    }
 }

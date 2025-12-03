@@ -499,7 +499,6 @@ const PetitionTable = () => {
 
     useEffect(() => {
         if (prevValues) {
-            // setIsLoading(true);
             const query = Object.keys(
                 pickBy({
                     ...filterValues,
