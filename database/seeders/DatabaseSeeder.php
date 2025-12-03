@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $this->call([ClientSeeder::class]);
+        if (app()->isLocal()) {
+            $this->call([ClientSeeder::class]);
+        }
     }
 }
