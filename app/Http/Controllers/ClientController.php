@@ -81,6 +81,8 @@ class ClientController extends Controller
      */
     public function store(StoreClientRequest $request)
     {
+
+
         Client::create($request->only([
             'first_name',
             'last_name',
@@ -88,6 +90,10 @@ class ClientController extends Controller
             'suffix',
             'contact_number',
         ]));
+
+        if (request()->routeIs('clients.store-from-petition')) {
+            return back();
+        }
 
         return to_route('clients.index');
     }

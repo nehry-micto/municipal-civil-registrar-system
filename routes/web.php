@@ -54,6 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/{client}/delete', 'delete')->name('delete');
             Route::post('/{client}/restore', 'restore')->name('restore')
                 ->withTrashed();
+            Route::post('/store-from-petition', 'store')->name('store-from-petition');
         }
     );
 

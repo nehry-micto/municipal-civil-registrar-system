@@ -38,7 +38,7 @@ const CreateClientModal = ({
     });
 
     const handleSubmit = async () => {
-        post(clients.store.url(), {
+        post(clients.storeFromPetition.url(), {
             onSuccess: () => {
                 onOpenChange(false);
                 reset();
