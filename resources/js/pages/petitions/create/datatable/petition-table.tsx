@@ -1,3 +1,4 @@
+import { EmptyTable } from '@/components/empty-table';
 import UIPagination from '@/components/shared/ui-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -54,7 +55,6 @@ import {
     DownloadIcon,
     Edit2,
     EllipsisIcon,
-    InfoIcon,
     Lock,
     PlusCircleIcon,
     Search,
@@ -728,22 +728,14 @@ const PetitionTable = () => {
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="text-center"
-                                >
-                                    <div className="mt-8 flex flex-col items-center justify-center gap-2 text-primary/70">
-                                        <InfoIcon className="size-8" />
-                                        <p className="text-sm font-semibold">
-                                            No{' '}
-                                            {filterValues.tab.replace(
-                                                /_/g,
-                                                ' ',
-                                            )}{' '}
-                                            records found
-                                        </p>
-                                    </div>
+                            <TableRow className="hover:bg-none">
+                                <TableCell colSpan={columns.length}>
+                                    <EmptyTable
+                                        title="No Petitions Found"
+                                        description="You haven't created any petitions yet. Get started by creating your first petition."
+                                        buttonLabel="Create Petition"
+                                        buttonLink={petitionsRoute.create().url}
+                                    />
                                 </TableCell>
                             </TableRow>
                         )}

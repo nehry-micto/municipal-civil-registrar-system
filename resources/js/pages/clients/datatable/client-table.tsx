@@ -1,3 +1,4 @@
+import { EmptyTable } from '@/components/empty-table';
 import UIPagination from '@/components/shared/ui-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -44,7 +45,6 @@ import {
     Edit2,
     EllipsisIcon,
     Eye,
-    InfoIcon,
     PlusCircleIcon,
     Search,
     TrashIcon,
@@ -429,12 +429,12 @@ const ClientTable = () => {
                                     colSpan={columns.length}
                                     className="text-center"
                                 >
-                                    <div className="mt-8 flex flex-col items-center justify-center gap-2 text-primary/70">
-                                        <InfoIcon className="size-8" />
-                                        <p className="text-sm font-semibold">
-                                            No clients found
-                                        </p>
-                                    </div>
+                                    <EmptyTable
+                                        title="No Clients Found"
+                                        description="You haven't created any clients yet. Get started by creating your first client."
+                                        buttonLabel="Create Client"
+                                        buttonLink={clients.create().url}
+                                    />
                                 </TableCell>
                             </TableRow>
                         )}
