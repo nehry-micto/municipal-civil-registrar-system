@@ -1,6 +1,7 @@
 import UIPagination from '@/components/shared/ui-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { DataTableColumnHeader } from '@/components/ui/data-table-column-header';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -41,9 +42,10 @@ import {
     ColumnDef,
     flexRender,
     getCoreRowModel,
+    SortingState,
     useReactTable,
 } from '@tanstack/react-table';
-import { debounce, pickBy } from 'lodash';
+import { debounce, pickBy, startCase } from 'lodash';
 import {
     ArrowRight,
     CalendarIcon,
@@ -107,8 +109,8 @@ const PetitionTable = () => {
         filters?: {
             tab?: string;
             search?: string;
-            column?: string;
-            sortDirection?: string;
+            sortBy?: string;
+            sortDir?: string;
             trashedRecords?: number;
         };
         petitionSteps: {
@@ -118,13 +120,18 @@ const PetitionTable = () => {
         }[];
     }>().props;
 
-    const [values, setValues] = useState({
+    const [filterValues, setFilterValues] = useState({
         search: filters?.search || '',
-        column: filters?.column || '',
-        sortDirection: filters?.sortDirection || '',
         trashedRecords: filters?.trashedRecords || '',
         tab: filters?.tab || '',
     });
+
+    const [sorting, setSorting] = useState<SortingState>([
+        {
+            id: filters?.sortBy || 'created_at',
+            desc: filters?.sortDir === 'desc',
+        },
+    ]);
 
     const [columnVisibility, setColumnVisibility] = useState<
         Record<string, boolean>
@@ -279,7 +286,12 @@ const PetitionTable = () => {
             },
             {
                 accessorKey: 'date_of_filing',
-                header: 'Date of Filing',
+                header: ({ column }) => (
+                    <DataTableColumnHeader
+                        column={column}
+                        title="Date of Filing"
+                    />
+                ),
                 cell: (info) => (
                     <div className="flex items-center gap-1 text-xs">
                         <CalendarIcon className="size-3" />
@@ -289,7 +301,13 @@ const PetitionTable = () => {
             },
             {
                 accessorKey: 'petition_number',
-                header: 'Petition No.',
+                enableSorting: false,
+                header: ({ column }) => (
+                    <DataTableColumnHeader
+                        column={column}
+                        title="Petition No."
+                    />
+                ),
                 cell: (info) => (
                     <Badge variant="default">
                         {info.getValue().toString()}
@@ -298,7 +316,13 @@ const PetitionTable = () => {
             },
             {
                 accessorKey: 'registry_number',
-                header: 'Registry No.',
+                enableSorting: false,
+                header: ({ column }) => (
+                    <DataTableColumnHeader
+                        column={column}
+                        title="Registry No."
+                    />
+                ),
                 cell: (info) => (
                     <Badge variant="default">
                         {info.getValue().toString()}
@@ -308,11 +332,16 @@ const PetitionTable = () => {
 
             {
                 accessorKey: 'document_owner',
-                header: 'Document Owner',
+                header: ({ column }) => (
+                    <DataTableColumnHeader
+                        column={column}
+                        title="Document Owner"
+                    />
+                ),
 
                 cell: (info) => (
                     <div className="flex items-center gap-2 font-bold uppercase">
-                        <div className="flex size-8 items-center justify-center rounded-full bg-primary text-center text-xs font-normal text-white">
+                        <div className="flex size-8 items-center justify-center rounded-full bg-primary text-center text-xs font-normal text-primary-foreground">
                             <span>
                                 {info.getValue().toString().slice(0, 2)}
                             </span>
@@ -321,11 +350,39 @@ const PetitionTable = () => {
                     </div>
                 ),
             },
-            { accessorKey: 'document_type', header: 'Document Type' },
-            { accessorKey: 'petition_type', header: 'Petition Type' },
-            { accessorKey: 'petition_nature', header: 'Petition Nature' },
+            {
+                accessorKey: 'document_type',
+                enableSorting: false,
+                header: ({ column }) => (
+                    <DataTableColumnHeader
+                        column={column}
+                        title="Document Type"
+                    />
+                ),
+            },
+            {
+                accessorKey: 'petition_type',
+                enableSorting: false,
+                header: ({ column }) => (
+                    <DataTableColumnHeader
+                        column={column}
+                        title="Petition Type"
+                    />
+                ),
+            },
+            {
+                accessorKey: 'petition_nature',
+                enableSorting: false,
+                header: ({ column }) => (
+                    <DataTableColumnHeader
+                        column={column}
+                        title="Petition Nature"
+                    />
+                ),
+            },
             {
                 accessorKey: 'errors_to_correct',
+                enableSorting: false,
                 header: 'Errors to Correct',
                 cell: (info) => {
                     const errors = info.getValue() as ErrorsToCorrect[];
@@ -380,7 +437,10 @@ const PetitionTable = () => {
             },
             {
                 accessorKey: 'priority',
-                header: 'Priority',
+                enableSorting: false,
+                header: ({ column }) => (
+                    <DataTableColumnHeader column={column} title="Priority" />
+                ),
 
                 cell: (info) => {
                     const priority =
@@ -403,12 +463,16 @@ const PetitionTable = () => {
             },
             {
                 accessorKey: 'created_at',
-                header: 'Created At',
+                header: ({ column }) => (
+                    <DataTableColumnHeader column={column} title="Created At" />
+                ),
                 cell: (info) => info.getValue(),
             },
             {
                 accessorKey: 'updated_at',
-                header: 'Updated At',
+                header: ({ column }) => (
+                    <DataTableColumnHeader column={column} title="Updated At" />
+                ),
                 cell: (info) => info.getValue(),
             },
         ],
@@ -418,13 +482,13 @@ const PetitionTable = () => {
 
     const page = usePage();
 
-    const prevValues = usePrevious(values);
+    const prevValues = usePrevious(filterValues);
 
     const debounceFilter = useMemo(
         () =>
             debounce((query) => {
                 router.get(page.url, query, {
-                    preserveState: true,
+                    preserveScroll: true,
                     replace: true,
                 });
             }, 300),
@@ -435,14 +499,24 @@ const PetitionTable = () => {
 
     useEffect(() => {
         if (prevValues) {
-            setIsLoading(true);
-            const query = Object.keys(pickBy(values)).length
-                ? pickBy(values)
+            // setIsLoading(true);
+            const query = Object.keys(
+                pickBy({
+                    ...filterValues,
+                    sortBy: sorting[0]?.id,
+                    sortDir: sorting[0]?.desc ? 'desc' : 'asc',
+                }),
+            ).length
+                ? pickBy({
+                      ...filterValues,
+                      sortBy: sorting[0]?.id,
+                      sortDir: sorting[0]?.desc ? 'desc' : 'asc',
+                  })
                 : {};
             debounceFilter(query);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [values]);
+    }, [filterValues, sorting]);
 
     useEffect(() => {
         // const removeStartListener = router.on('start', () => {
@@ -461,7 +535,7 @@ const PetitionTable = () => {
     const table = useReactTable({
         data: petitions?.data || [],
         columns,
-        state: { columnVisibility },
+        state: { columnVisibility, sorting },
         getCoreRowModel: getCoreRowModel(),
         onColumnVisibilityChange: (updater) => {
             setColumnVisibility((prev) => {
@@ -474,6 +548,8 @@ const PetitionTable = () => {
                 return newVisibility;
             });
         },
+        manualSorting: true,
+        onSortingChange: setSorting,
     });
 
     return (
@@ -499,19 +575,22 @@ const PetitionTable = () => {
                     <div className="relative flex w-full max-w-sm items-center">
                         <Input
                             onChange={(e) =>
-                                setValues({ ...values, search: e.target.value })
+                                setFilterValues({
+                                    ...filterValues,
+                                    search: e.target.value,
+                                })
                             }
-                            value={values.search}
+                            value={filterValues.search}
                             placeholder="Search..."
                         />
                         <Search className="absolute right-3 size-4" />
                     </div>
                     <Select
-                        value={values.trashedRecords.toString()}
+                        value={filterValues.trashedRecords.toString()}
                         name="trashRecords"
                         onValueChange={(value) => {
-                            setValues({
-                                ...values,
+                            setFilterValues({
+                                ...filterValues,
                                 trashedRecords: value,
                             });
                         }}
@@ -527,7 +606,7 @@ const PetitionTable = () => {
                     </Select>
                     {
                         // check if filters are empty and show the clear button
-                        Object.keys(pickBy(values)).length > 0 && (
+                        Object.keys(pickBy(filterValues)).length > 0 && (
                             <Button
                                 variant="destructive"
                                 onClick={() =>
@@ -558,7 +637,7 @@ const PetitionTable = () => {
                                                 column.toggleVisibility()
                                             }
                                         >
-                                            {column.columnDef.header?.toString()}
+                                            {startCase(column.id)}
                                         </DropdownMenuCheckboxItem>
                                     ),
                             )}
@@ -576,12 +655,12 @@ const PetitionTable = () => {
             <div className="overflow-x-auto">
                 <Tabs
                     onValueChange={(value: string) => {
-                        setValues({
-                            ...values,
+                        setFilterValues({
+                            ...filterValues,
                             tab: value,
                         });
                     }}
-                    value={values.tab || 'encoding'}
+                    value={filterValues.tab || 'encoding'}
                     className="mt-8 mb-4"
                 >
                     <TabsList className="">
@@ -658,7 +737,11 @@ const PetitionTable = () => {
                                     <div className="mt-8 flex flex-col items-center justify-center gap-2 text-primary/70">
                                         <InfoIcon className="size-8" />
                                         <p className="text-sm font-semibold">
-                                            No {values.tab.replace(/_/g, ' ')}{' '}
+                                            No{' '}
+                                            {filterValues.tab.replace(
+                                                /_/g,
+                                                ' ',
+                                            )}{' '}
                                             records found
                                         </p>
                                     </div>

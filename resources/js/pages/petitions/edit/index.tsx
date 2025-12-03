@@ -93,18 +93,6 @@ const Edit = ({ petition }: EditProps) => {
         });
     };
 
-    // Determine current step index
-    const currentStepLabel = petition.next_step;
-    const currentStepIndex = currentStepLabel
-        ? petitionSteps.findIndex((s) => s.label === currentStepLabel)
-        : petitionSteps.length;
-
-    const getStepStatus = (stepIndex: number) => {
-        if (stepIndex < currentStepIndex) return 'completed';
-        if (stepIndex === currentStepIndex) return 'current';
-        return 'future';
-    };
-
     return (
         <div className="container mx-auto max-w-7xl space-y-8 px-8 py-4">
             {/* Header */}
@@ -449,7 +437,8 @@ const Edit = ({ petition }: EditProps) => {
                         <CardContent>
                             <div className="relative space-y-0">
                                 {petitionSteps.map((step, index) => {
-                                    const status = step.value <= petition.current_step; 
+                                    const status =
+                                        step.value <= petition.current_step;
                                     const isLast =
                                         index === petitionSteps.length - 1;
 
@@ -464,7 +453,7 @@ const Edit = ({ petition }: EditProps) => {
                                                 <span
                                                     className={cn(
                                                         'absolute top-4 left-4 -ml-px h-full w-0.5',
-                                                        status 
+                                                        status
                                                             ? 'bg-primary'
                                                             : 'bg-muted',
                                                     )}
@@ -475,15 +464,17 @@ const Edit = ({ petition }: EditProps) => {
                                                 <div
                                                     className={cn(
                                                         'relative flex h-8 w-8 items-center justify-center rounded-full ring-8 ring-white',
-                                                        status ? 'bg-green-500' : 'bg-muted',
+                                                        status
+                                                            ? 'bg-green-500'
+                                                            : 'bg-muted',
                                                     )}
                                                 >
-                                                    {status  ? (
+                                                    {status ? (
                                                         <CheckCircle2Icon
                                                             className="h-5 w-5 text-white"
                                                             aria-hidden="true"
                                                         />
-                                                    ) : status  ? (
+                                                    ) : status ? (
                                                         <span
                                                             className="h-2.5 w-2.5 rounded-full bg-white"
                                                             aria-hidden="true"
@@ -523,12 +514,14 @@ const Edit = ({ petition }: EditProps) => {
                                                                     variant="outline"
                                                                     size="sm"
                                                                     className="h-7 text-xs"
-                                                                    onClick={() =>
-                                                                    {
-                                                                        setActiveModal(step.value)
-                                                                        console.log(step.value)
-                                                                    }
-                                                                    }
+                                                                    onClick={() => {
+                                                                        setActiveModal(
+                                                                            step.value,
+                                                                        );
+                                                                        console.log(
+                                                                            step.value,
+                                                                        );
+                                                                    }}
                                                                 >
                                                                     <Edit2 className="mr-1.5 size-3" />
                                                                     Edit

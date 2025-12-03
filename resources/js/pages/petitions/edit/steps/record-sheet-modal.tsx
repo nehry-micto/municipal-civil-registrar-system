@@ -18,6 +18,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { formatDateForInput } from '@/lib/utils';
 import petitions from '@/routes/petitions';
 import { Petition } from '@/types';
 import { useForm } from '@inertiajs/react';
@@ -35,27 +36,20 @@ const RecordSheetModal = ({
     onOpenChange,
     petition,
 }: RecordSheetModalProps) => {
-    const { data, setData, put, processing, errors } = useForm({
+    const getFormData = () => ({
         step: 'record_sheet',
-        first_published_at: petition.record_sheet?.first_published_at || '',
-        second_published_at: petition.record_sheet?.second_published_at || '',
-        rendered_date: petition.record_sheet?.rendered_date || '',
+        first_published_at: formatDateForInput(petition.record_sheet?.first_published_at),
+        second_published_at: formatDateForInput(petition.record_sheet?.second_published_at),
+        rendered_date: formatDateForInput(petition.record_sheet?.rendered_date),
         decision: petition.record_sheet?.decision?.toString() || '1',
         remarks: petition.record_sheet?.remarks || '',
     });
 
+    const { data, setData, put, processing, errors } = useForm(getFormData());
+
     useEffect(() => {
         if (open) {
-            setData({
-                step: 'record_sheet',
-                first_published_at:
-                    petition.record_sheet?.first_published_at || '',
-                second_published_at:
-                    petition.record_sheet?.second_published_at || '',
-                rendered_date: petition.record_sheet?.rendered_date || '',
-                decision: petition.record_sheet?.decision?.toString() || '1',
-                remarks: petition.record_sheet?.remarks || '',
-            });
+            setData(getFormData());
         }
     }, [open, petition]);
 

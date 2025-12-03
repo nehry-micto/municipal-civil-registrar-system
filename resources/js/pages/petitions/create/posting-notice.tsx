@@ -60,10 +60,10 @@ const PostingNotice = ({
                 setSelectedRecord(open ? selectedRecord : null)
             }
         >
-            <DialogContent className="max-w-fit">
+            <DialogContent className="w-[400px]">
                 <DialogTitle>Notice of Posting</DialogTitle>
                 <DialogDescription>Please fill the date</DialogDescription>
-                <div className="w-fit items-center space-y-2">
+                <div className="w-fit items-center space-y-2 ">
                     <Label htmlFor="notice_date">Date</Label>
                     <Input
                         name="notice_date"

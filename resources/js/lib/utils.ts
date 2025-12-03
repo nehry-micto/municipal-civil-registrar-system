@@ -16,3 +16,8 @@ export function isSameUrl(
 export function resolveUrl(url: NonNullable<InertiaLinkProps['href']>): string {
     return typeof url === 'string' ? url : url.url;
 }
+
+export function formatDateForInput(dateString?: string | null | Date): string {
+    if (!dateString) return '';
+    return new Date(dateString).toISOString().split('T')[0];
+}

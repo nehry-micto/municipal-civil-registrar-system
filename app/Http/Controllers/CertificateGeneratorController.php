@@ -21,11 +21,7 @@ class CertificateGeneratorController extends Controller
             storage_path('app/templates/POSTING_NOTICE.docx')
         );
 
-        $documentType = match ($petition->document_type) {
-            1 => 'Birth Certificate',
-            2 => 'Death Certificate',
-            default => 'Document',
-        };
+        $documentType = $petition->document_type->name();
         
         
 
@@ -72,11 +68,7 @@ class CertificateGeneratorController extends Controller
             storage_path('app/templates/CERT_POSTING.docx')
         );
 
-        $documentType = match ($petition->document_type) {
-            1 => 'Birth Certificate',
-            2 => 'Death Certificate',
-            default => 'Document',
-        };
+        $documentType = $petition->document_type->name();
 
         $templateProcessor->setValue('petition_no', $petition->petition_number);
         $templateProcessor->setValue('petitioner', $petition->client->full_name);
@@ -131,18 +123,10 @@ class CertificateGeneratorController extends Controller
         }
 
         // Map document type enum to readable string
-        $documentType = match ($petition->document_type) {
-            1 => 'Birth Certificate',
-            2 => 'Death Certificate',
-            default => 'Document',
-        };
+        $documentType = $petition->document_type->name();
 
         // Map petition type enum to readable string
-        $petitionType = match ($petition->petition_type) {
-            1 => 'Correction',
-            2 => 'Late Registration',
-            default => 'Petition',
-        };
+        $petitionType = $petition->petition_type->name();
 
         // Set basic petition data
         $templateProcessor->setValue('date', $petition->date_of_filing->format('d F Y'));
@@ -214,11 +198,7 @@ class CertificateGeneratorController extends Controller
         }
 
         // Map document type enum to readable string
-        $documentType = match ($petition->document_type) {
-            1 => 'Birth Certificate',
-            2 => 'Death Certificate',
-            default => 'Document',
-        };
+        $documentType = $petition->document_type->name();
 
         // Set petition data with proper date formatting (DD Month YYYY)
         $templateProcessor->setValue('petition_no', $petition->petition_number);

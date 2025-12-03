@@ -2,21 +2,18 @@
 
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CertificateGeneratorController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PetitionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
 Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
+    return Inertia::render('welcome');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     Route::group([
         'controller' => PetitionController::class,

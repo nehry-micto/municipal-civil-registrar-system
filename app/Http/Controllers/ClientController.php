@@ -17,15 +17,15 @@ class ClientController extends Controller
     public function index(Request $request)
     {
         $validated = $request->validate([
-            'sortDirection' => 'string|in:asc,desc',
-            'column' => 'string|in:client_code,full_name,created_at',
+            'sortDir' => 'string|in:asc,desc',
+            'sortBy' => 'string|in:client_code,full_name,contact_number,created_at,petitions_count',
             'search' => 'string|max:255',
             'perPage' => 'integer|between:1,100',
             'trashedRecords' => 'in:1,2,3',
         ]);
 
-        $sortDirection = $validated['sortDirection'] ?? 'desc';
-        $column = $validated['column'] ?? 'created_at';
+        $sortDir = $validated['sortDir'] ?? 'desc';
+        $sortBy = $validated['sortBy'] ?? 'created_at';
         $search = $validated['search'] ?? '';
         $perPage = $validated['perPage'] ?? 10;
         $trashedRecords = $validated['trashedRecords'] ?? 0;
@@ -52,8 +52,14 @@ class ClientController extends Controller
                 }
             });
 
-        $clients = $query->orderBy($column, $sortDirection)
-            ->paginate($perPage)
+        if ($sortBy === 'full_name') {
+            $query->orderBy('last_name', $sortDir)
+                ->orderBy('first_name', $sortDir);
+        } else {
+            $query->orderBy($sortBy, $sortDir);
+        }
+
+        $clients = $query->paginate($perPage)
             ->withQueryString();
 
         return Inertia::render('clients/index', [

@@ -9,6 +9,7 @@ use App\Models\Client;
 use App\Models\Petition;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Enums\PetitionStatus;
 
 class PetitionController extends Controller
 {
@@ -18,16 +19,16 @@ class PetitionController extends Controller
     public function index(Request $request)
     {
         $validated = $request->validate([
-            'sortDirection' => 'string|in:asc,desc',
-            'column' => 'string|in:name,amount,full_name,created_at',
+            'sortDir' => 'string|in:asc,desc',
+            'sortBy' => 'string|in:petition_number,registry_number,date_of_filing,document_type,petition_type,petition_nature,priority,created_at,updated_at,document_owner',
             'search' => 'string|max:255',
             'perPage' => 'integer|between:1,100',
             'tab' => 'string|in:all,encoding,posting_notice,posting_certificate,record_sheet,finality_certificate',
             'trashedRecords' => 'in:1,2,3',
         ]);
 
-        $sortDirection = $validated['sortDirection'] ?? 'asc';
-        $column = $validated['column'] ?? 'created_at';
+        $sortDir = $validated['sortDir'] ?? 'desc';
+        $sortBy = $validated['sortBy'] ?? 'date_of_filing';
         $search = $validated['search'] ?? '';
         $perPage = $validated['perPage'] ?? 10;
         $trashedRecords = $validated['trashedRecords'] ?? 0;
@@ -68,7 +69,7 @@ class PetitionController extends Controller
         }
 
         $petitions =
-            $query->orderBy($column, $sortDirection)
+            $query->orderBy($sortBy, $sortDir)
             ->paginate($perPage)
             ->withQueryString()
             ->toResourceCollection();
@@ -278,6 +279,7 @@ class PetitionController extends Controller
 
             $petition->update([
                 'current_step' => $nextStep,
+                'status' => PetitionStatus::COMPLETED,
             ]);
 
             $petition->finality()->create([

@@ -17,10 +17,11 @@ const NoticeStep = ({ data, setData }: NoticeStepProps) => {
                 <CardTitle className="text-base">Notice of Posting</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="space-y-2">
+                <div className="space-y-2 w-full">
                     <Label>Posting Date</Label>
                     <Input
                         type="date"
+                        className="w-full"
                         value={data.notice.notice_posting_date || ''}
                         onChange={(e) =>
                             setData('notice', {

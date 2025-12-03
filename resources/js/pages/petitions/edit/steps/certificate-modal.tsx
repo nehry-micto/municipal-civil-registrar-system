@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { formatDateForInput } from '@/lib/utils';
 import petitions from '@/routes/petitions';
 import { Petition } from '@/types';
 import { useForm } from '@inertiajs/react';
@@ -27,21 +28,18 @@ const CertificateModal = ({
     onOpenChange,
     petition,
 }: CertificateModalProps) => {
-    const { data, setData, put, processing, errors } = useForm({
+    const getFormData = () => ({
         step: 'certificate',
-        start_date: petition.certificate?.start_date || '',
-        end_date: petition.certificate?.end_date || '',
-        posting_date: petition.certificate?.posting_date || '',
+        start_date: formatDateForInput(petition.certificate?.start_date),
+        end_date: formatDateForInput(petition.certificate?.end_date),
+        posting_date: formatDateForInput(petition.certificate?.posting_date),
     });
+
+    const { data, setData, put, processing, errors } = useForm(getFormData());
 
     useEffect(() => {
         if (open) {
-            setData({
-                step: 'certificate',
-                start_date: petition.certificate?.start_date || '',
-                end_date: petition.certificate?.end_date || '',
-                posting_date: petition.certificate?.posting_date || '',
-            });
+            setData(getFormData());
         }
     }, [open, petition]);
 

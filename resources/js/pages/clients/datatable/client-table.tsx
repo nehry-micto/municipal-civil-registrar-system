@@ -1,6 +1,7 @@
 import UIPagination from '@/components/shared/ui-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { DataTableColumnHeader } from '@/components/ui/data-table-column-header';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -34,9 +35,10 @@ import {
     ColumnDef,
     flexRender,
     getCoreRowModel,
+    SortingState,
     useReactTable,
 } from '@tanstack/react-table';
-import { debounce, pickBy } from 'lodash';
+import { debounce, pickBy, startCase } from 'lodash';
 import {
     Columns,
     Edit2,
@@ -46,7 +48,6 @@ import {
     PlusCircleIcon,
     Search,
     TrashIcon,
-    UserIcon,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { usePrevious } from 'react-use';
@@ -63,18 +64,25 @@ const ClientTable = () => {
         };
         filters?: {
             search?: string;
-            column?: string;
-            sortDirection?: string;
+            sortBy?: string;
+            sortDir?: string;
             trashedRecords?: number;
         };
     }>().props;
 
-    const [values, setValues] = useState({
+    const [filterValues, setFilterValues] = useState({
         search: filters?.search || '',
-        column: filters?.column || '',
-        sortDirection: filters?.sortDirection || '',
+        sortBy: filters?.sortBy || '',
+        sortDir: filters?.sortDir || '',
         trashedRecords: filters?.trashedRecords || '',
     });
+
+    const [sorting, setSorting] = useState<SortingState>([
+        {
+            id: filterValues.sortBy || 'created_at',
+            desc: filterValues.sortDir === 'desc',
+        },
+    ]);
 
     const [columnVisibility, setColumnVisibility] = useState<
         Record<string, boolean>
@@ -101,12 +109,20 @@ const ClientTable = () => {
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild>
-                                <Link href={clients.show.url(info.row.original.id)}>
+                                <Link
+                                    href={clients.show.url(
+                                        info.row.original.id,
+                                    )}
+                                >
                                     <Eye className="size-4" /> View
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
-                                <Link href={clients.edit.url(info.row.original.id)}>
+                                <Link
+                                    href={clients.edit.url(
+                                        info.row.original.id,
+                                    )}
+                                >
                                     <Edit2 className="size-4" /> Edit
                                 </Link>
                             </DropdownMenuItem>
@@ -115,14 +131,19 @@ const ClientTable = () => {
                                     className="w-full"
                                     method="delete"
                                     as="button"
-                                    href={clients.destroy.url(info.row.original.id)}
+                                    href={clients.destroy.url(
+                                        info.row.original.id,
+                                    )}
                                     onSuccess={() =>
-                                        toast.success('Client deleted successfully!')
+                                        toast.success(
+                                            'Client deleted successfully!',
+                                        )
                                     }
                                     preserveScroll
                                     preserveState
                                 >
-                                    <TrashIcon className="size-4 text-red-600" /> Delete
+                                    <TrashIcon className="size-4 text-red-600" />{' '}
+                                    Delete
                                 </Link>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -131,19 +152,33 @@ const ClientTable = () => {
             },
             {
                 accessorKey: 'client_code',
-                header: 'Client Code',
+                enableSorting: false,
+                header: ({ column }) => (
+                    <DataTableColumnHeader
+                        column={column}
+                        title="Client Code"
+                    />
+                ),
                 cell: (info) => (
-                    <Badge variant="default">{info.getValue().toString()}</Badge>
+                    <Badge variant="default">
+                        {info.getValue().toString()}
+                    </Badge>
                 ),
             },
             {
                 accessorKey: 'full_name',
-                header: 'Full Name',
+                header: ({ column }) => (
+                    <DataTableColumnHeader column={column} title="Full Name" />
+                ),
                 cell: (info) => (
                     <div className="flex items-center gap-2 font-medium">
                         <div className="flex size-8 items-center justify-center rounded-full bg-primary text-center text-xs font-normal text-white">
                             <span>
-                                {info.getValue().toString().slice(0, 2).toUpperCase()}
+                                {info
+                                    .getValue()
+                                    .toString()
+                                    .slice(0, 2)
+                                    .toUpperCase()}
                             </span>
                         </div>
                         <span>{info.getValue().toString()}</span>
@@ -152,12 +187,21 @@ const ClientTable = () => {
             },
             {
                 accessorKey: 'contact_number',
-                header: 'Contact Number',
+                enableSorting: false,
+                header: ({ column }) => (
+                    <DataTableColumnHeader
+                        column={column}
+                        title="Contact Number"
+                    />
+                ),
                 cell: (info) => info.getValue() || 'N/A',
             },
             {
                 accessorKey: 'petitions_count',
-                header: 'Petitions',
+                enableSorting: false,
+                header: ({ column }) => (
+                    <DataTableColumnHeader column={column} title="Petitions" />
+                ),
                 cell: (info) => (
                     <Badge variant="secondary">
                         {info.getValue()?.toString() || '0'}
@@ -166,7 +210,16 @@ const ClientTable = () => {
             },
             {
                 accessorKey: 'created_at',
-                header: 'Created At',
+                header: ({ column }) => (
+                    <DataTableColumnHeader column={column} title="Created At" />
+                ),
+                cell: (info) => info.getValue(),
+            },
+            {
+                accessorKey: 'updated_at',
+                header: ({ column }) => (
+                    <DataTableColumnHeader column={column} title="Updated At" />
+                ),
                 cell: (info) => info.getValue(),
             },
         ],
@@ -174,13 +227,13 @@ const ClientTable = () => {
     );
 
     const page = usePage();
-    const prevValues = usePrevious(values);
+    const prevValues = usePrevious(filterValues);
 
     const debounceFilter = useMemo(
         () =>
             debounce((query) => {
                 router.get(page.url, query, {
-                    preserveState: true,
+                    preserveScroll: true,
                     replace: true,
                 });
             }, 300),
@@ -191,12 +244,23 @@ const ClientTable = () => {
 
     useEffect(() => {
         if (prevValues) {
-            setIsLoading(true);
-            const query = Object.keys(pickBy(values)).length ? pickBy(values) : {};
+            const query = Object.keys(
+                pickBy({
+                    ...filterValues,
+                    sortBy: sorting[0]?.id,
+                    sortDir: sorting[0]?.desc ? 'desc' : 'asc',
+                }),
+            ).length
+                ? pickBy({
+                      ...filterValues,
+                      sortBy: sorting[0]?.id,
+                      sortDir: sorting[0]?.desc ? 'desc' : 'asc',
+                  })
+                : {};
             debounceFilter(query);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [values]);
+    }, [filterValues, sorting]);
 
     useEffect(() => {
         const removeFinishListener = router.on('finish', () => {
@@ -211,7 +275,7 @@ const ClientTable = () => {
     const table = useReactTable({
         data: clientsData?.data || [],
         columns,
-        state: { columnVisibility },
+        state: { columnVisibility, sorting },
         getCoreRowModel: getCoreRowModel(),
         onColumnVisibilityChange: (updater) => {
             setColumnVisibility((prev) => {
@@ -224,6 +288,8 @@ const ClientTable = () => {
                 return newVisibility;
             });
         },
+        manualSorting: true,
+        onSortingChange: setSorting,
     });
 
     return (
@@ -233,19 +299,22 @@ const ClientTable = () => {
                     <div className="relative flex w-full max-w-sm items-center">
                         <Input
                             onChange={(e) =>
-                                setValues({ ...values, search: e.target.value })
+                                setFilterValues({
+                                    ...filterValues,
+                                    search: e.target.value,
+                                })
                             }
-                            value={values.search}
+                            value={filterValues.search}
                             placeholder="Search clients..."
                         />
                         <Search className="absolute right-3 size-4" />
                     </div>
                     <Select
-                        value={values.trashedRecords.toString()}
+                        value={filterValues.trashedRecords.toString()}
                         name="trashRecords"
                         onValueChange={(value) => {
-                            setValues({
-                                ...values,
+                            setFilterValues({
+                                ...filterValues,
                                 trashedRecords: value,
                             });
                         }}
@@ -259,7 +328,7 @@ const ClientTable = () => {
                             <SelectItem value="3">All records</SelectItem>
                         </SelectContent>
                     </Select>
-                    {Object.keys(pickBy(values)).length > 0 && (
+                    {Object.keys(pickBy(filterValues)).length > 0 && (
                         <Button
                             variant="destructive"
                             onClick={() => router.get(clients.index().url)}
@@ -287,7 +356,7 @@ const ClientTable = () => {
                                                 column.toggleVisibility()
                                             }
                                         >
-                                            {column.columnDef.header?.toString()}
+                                            {startCase(column.id)}
                                         </DropdownMenuCheckboxItem>
                                     ),
                             )}
@@ -324,7 +393,10 @@ const ClientTable = () => {
                             Array.from({ length: 5 }).map((_, index) => (
                                 <TableRow key={index}>
                                     {columns.map((column, index) => (
-                                        <TableCell key={index} className="m-2 text-center">
+                                        <TableCell
+                                            key={index}
+                                            className="m-2 text-center"
+                                        >
                                             <Skeleton className="h-4 w-full px-4" />
                                         </TableCell>
                                     ))}
@@ -336,7 +408,9 @@ const ClientTable = () => {
                                     className="cursor-pointer"
                                     key={row.id}
                                     onDoubleClick={() =>
-                                        router.visit(clients.show.url(row.original.id))
+                                        router.visit(
+                                            clients.show.url(row.original.id),
+                                        )
                                     }
                                 >
                                     {row.getVisibleCells().map((cell) => (
@@ -351,7 +425,10 @@ const ClientTable = () => {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="text-center">
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="text-center"
+                                >
                                     <div className="mt-8 flex flex-col items-center justify-center gap-2 text-primary/70">
                                         <InfoIcon className="size-8" />
                                         <p className="text-sm font-semibold">

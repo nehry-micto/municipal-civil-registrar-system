@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { formatDateForInput } from '@/lib/utils';
 import petitions from '@/routes/petitions';
 import { Petition } from '@/types';
 import { useForm } from '@inertiajs/react';
@@ -23,14 +24,16 @@ interface NoticeModalProps {
 }
 
 const NoticeModal = ({ open, onOpenChange, petition }: NoticeModalProps) => {
-    const { data, setData, put, processing, errors, reset } = useForm({
+    const getFormData = () => ({
         step: 'notice',
-        notice_posting_date: petition.notice?.notice_posting_date || '',
+        notice_posting_date: formatDateForInput(petition.notice?.notice_posting_date),
     });
+
+    const { data, setData, put, processing, errors, reset } = useForm(getFormData());
 
     useEffect(() => {
         if (open) {
-            setData('notice_posting_date', petition.notice?.notice_posting_date || '');
+            setData(getFormData());
         }
     }, [open, petition]);
 
@@ -57,6 +60,7 @@ const NoticeModal = ({ open, onOpenChange, petition }: NoticeModalProps) => {
                     <div className="space-y-2">
                         <Label htmlFor="notice_posting_date">Posting Date</Label>
                         <Input
+                            className="w-full"
                             id="notice_posting_date"
                             type="date"
                             value={data.notice_posting_date}

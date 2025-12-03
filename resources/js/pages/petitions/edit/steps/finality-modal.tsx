@@ -11,6 +11,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { formatDateForInput } from '@/lib/utils';
 import petitions from '@/routes/petitions';
 import { Petition } from '@/types';
 import { useForm } from '@inertiajs/react';
@@ -35,29 +36,18 @@ const FinalityModal = ({
     onOpenChange,
     petition,
 }: FinalityModalProps) => {
-    const { data, setData, put, processing, errors } = useForm<FinalityFormData>({
+    const getFormData = () => ({
         step: 'finality',
         certificate_number: petition.finality?.certificate_number || '',
-        released_at: petition.finality?.released_at
-            ? new Date(petition.finality.released_at)
-                  .toISOString()
-                  .split('T')[0]
-            : '',
+        released_at: formatDateForInput(petition.finality?.released_at),
         notes: petition.finality?.notes || '',
     });
 
+    const { data, setData, put, processing, errors } = useForm<FinalityFormData>(getFormData());
+
     useEffect(() => {
         if (open) {
-            setData({
-                step: 'finality',
-                certificate_number: petition.finality?.certificate_number || '',
-                released_at: petition.finality?.released_at
-                    ? new Date(petition.finality.released_at)
-                          .toISOString()
-                          .split('T')[0]
-                    : '',
-                notes: petition.finality?.notes || '',
-            });
+            setData(getFormData());
         }
     }, [open, petition]);
 
