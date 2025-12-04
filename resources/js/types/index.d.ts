@@ -57,7 +57,7 @@ export interface Client {
 }
 
 export interface ErrorsToCorrect {
-    item_number: string;
+    item_number: number;
     description: string;
     current_value: string;
     corrected_value: string;

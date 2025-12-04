@@ -29,7 +29,7 @@ const usePetitionForm = () => {
         setData('errors_to_correct', [
             ...formData.errors_to_correct,
             {
-                item_number: '',
+                item_number: formData.errors_to_correct.length + 1,
                 description: '',
                 current_value: '',
                 corrected_value: '',

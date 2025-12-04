@@ -774,7 +774,7 @@ const PetitionTable = () => {
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow className="hover:bg-none">
+                            <TableRow className="hover:bg-transparent">
                                 <TableCell colSpan={columns.length}>
                                     <EmptyTable
                                         title="No Petitions Found"

@@ -52,10 +52,13 @@ const DocumentDetailsStep = ({
     errors: FormDataErrors<PetitionForm>;
 }) => {
     const canProceed =
-        formData.registry_number &&
-        formData.document_type &&
-        formData.document_owner &&
-        formData.petition_nature;
+        formData.document_type !== '' &&
+        formData.petition_number.trim() !== '' &&
+        formData.registry_number.trim() !== '' &&
+        formData.date_of_filing.trim() !== '' &&
+        formData.document_owner.trim() !== '' &&
+        formData.petition_type !== '' &&
+        formData.petition_nature.trim() !== '';
 
     return (
         <Card className="border-1">
@@ -154,9 +157,9 @@ const DocumentDetailsStep = ({
                         </Label>
                         <Select
                             value={formData.document_type}
-                            onValueChange={(value) =>
-                                setData('document_type', value)
-                            }
+                            onValueChange={(value) => {
+                                setData('document_type', value);
+                            }}
                             aria-invalid={errors?.document_type ? true : false}
                         >
                             <SelectTrigger>

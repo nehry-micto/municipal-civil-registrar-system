@@ -20,7 +20,10 @@ import { AlertCircle, Plus, Trash2 } from 'lucide-react';
 
 interface ErrorCorrectionsSectionProps {
     data: PetitionForm;
-    setData: (key: keyof PetitionForm, value: any) => void;
+    setData: <K extends keyof PetitionForm>(
+        key: K,
+        value: PetitionForm[K],
+    ) => void;
 }
 
 const ErrorCorrectionsSection = ({
@@ -31,7 +34,7 @@ const ErrorCorrectionsSection = ({
         setData('errors_to_correct', [
             ...data.errors_to_correct,
             {
-                item_number: '',
+                item_number: data.errors_to_correct.length + 1,
                 description: '',
                 current_value: '',
                 corrected_value: '',

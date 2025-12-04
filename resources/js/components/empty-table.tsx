@@ -1,4 +1,4 @@
-import { FileText } from 'lucide-react';
+import { FilePlus2Icon, FileText } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -33,8 +33,11 @@ export function EmptyTable({
             </EmptyHeader>
             <EmptyContent>
                 <div className="flex gap-2">
-                    <Button>
-                        <Link href={buttonLink}>{buttonLabel}</Link>
+                    <Button asChild variant="outline">
+                        <Link href={buttonLink}>
+                            <FilePlus2Icon />
+                            {buttonLabel}
+                        </Link>
                     </Button>
                 </div>
             </EmptyContent>

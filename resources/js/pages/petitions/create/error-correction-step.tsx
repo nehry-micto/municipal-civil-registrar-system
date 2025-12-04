@@ -103,7 +103,7 @@ const ErrorCorrectionsStep = ({
 
                             <div className="grid gap-4">
                                 <div className="flex gap-4">
-                                    <div>
+                                    <div className="">
                                         <Label htmlFor={`item-${index}`}>
                                             Item Number
                                             <span className="text-red-500">
@@ -113,7 +113,8 @@ const ErrorCorrectionsStep = ({
                                         <Input
                                             id={`item-${index}`}
                                             placeholder="e.g., 1"
-                                            value={error.item_number ?? 1}
+                                            type="number"
+                                            value={error.item_number}
                                             onChange={(e) =>
                                                 updateErrorCorrection(
                                                     index,
