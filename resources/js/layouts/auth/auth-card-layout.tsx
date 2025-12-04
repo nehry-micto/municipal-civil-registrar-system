@@ -21,13 +21,14 @@ export default function AuthCardLayout({
 }>) {
     return (
         <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
-            <div className="flex w-full max-w-md flex-col gap-6">
+            <div className="flex w-full max-w-md flex-col gap-2">
                 <Link
                     href={home()}
-                    className="flex items-center gap-2 self-center font-medium"
+                    className="flex items-center self-center font-medium"
                 >
-                    <div className="flex h-9 w-9 items-center justify-center">
-                        <AppLogoIcon className="size-9 fill-current text-black dark:text-white" />
+                    <div className="flex flex-col items-center justify-center gap-2">
+                        <AppLogoIcon className="size-16 fill-current text-black dark:text-white" />
+                        <h4>Municipal Civil Registrar</h4>
                     </div>
                 </Link>
 
